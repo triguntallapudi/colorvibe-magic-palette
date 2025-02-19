@@ -65,7 +65,7 @@ const PaletteGenerator = () => {
           <ColorCard
             key={`${color}-${index}`}
             color={color}
-            onClick={() => setDialogOpen(true)}
+            onPaletteEdit={() => setDialogOpen(true)}
           />
         ))}
       </div>
