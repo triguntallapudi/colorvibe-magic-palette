@@ -5,32 +5,34 @@ export const THEME_COLORS: Record<string, string[]> = {
   forest: ['#004D1A', '#006622', '#008C2A', '#00B333', '#00D93B'],
   sunset: ['#FF8C00', '#FFA500', '#FFB732', '#FFCC66', '#FFE199'],
   lavender: ['#E6E6FA', '#D8BFD8', '#DDA0DD', '#DA70D6', '#BA55D3'],
+  tree: ['#1B4D3E', '#226F54', '#3F7F5F', '#7FB685', '#A5C9AC'],
+  grass: ['#2D5A27', '#4A8B38', '#87AB66', '#BEDC7F', '#D4E79E'],
+  sky: ['#B4E1FF', '#89CFF0', '#52B2FF', '#1E90FF', '#0066CC'],
   default: ['#0B0742', '#120C6E', '#5E72EB', '#FF9190', '#FDC094'],
 };
 
 export const generateAIColors = async (keyword: string): Promise<string[]> => {
-  try {
-    // First check if we have a predefined palette
-    if (keyword.toLowerCase() in THEME_COLORS) {
-      return THEME_COLORS[keyword.toLowerCase()];
-    }
-
-    // If not, try to generate one with AI
-    const response = await fetch('/api/generate-colors', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ keyword }),
-    });
-    
-    if (!response.ok) {
-      console.error('Failed to generate colors:', await response.text());
-      throw new Error('Failed to generate colors');
-    }
-    
-    const data = await response.json();
-    return data.colors;
-  } catch (error) {
-    console.error('Error generating colors:', error);
-    return THEME_COLORS.default;
+  // For now, we'll use predefined palettes and semantic matching
+  const lowercaseKeyword = keyword.toLowerCase();
+  
+  // Direct matches
+  if (lowercaseKeyword in THEME_COLORS) {
+    return THEME_COLORS[lowercaseKeyword];
   }
+
+  // Semantic matches
+  if (lowercaseKeyword.includes('tree') || 
+      lowercaseKeyword.includes('forest') || 
+      lowercaseKeyword.includes('plant')) {
+    return THEME_COLORS.tree;
+  }
+
+  if (lowercaseKeyword.includes('water') || 
+      lowercaseKeyword.includes('sea') || 
+      lowercaseKeyword.includes('wave')) {
+    return THEME_COLORS.ocean;
+  }
+
+  // Default fallback
+  return THEME_COLORS.default;
 };

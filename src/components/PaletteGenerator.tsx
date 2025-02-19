@@ -45,7 +45,7 @@ const PaletteGenerator = () => {
       <form onSubmit={handleSubmit} className="flex gap-4 max-w-xl mx-auto">
         <Input
           type="text"
-          placeholder="Try 'apple', 'ocean', or 'sunset'..."
+          placeholder="Try 'tree', 'ocean', or 'sunset'..."
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           className="glass-morphism"
