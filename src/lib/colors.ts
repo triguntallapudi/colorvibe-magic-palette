@@ -10,6 +10,12 @@ export const THEME_COLORS: Record<string, string[]> = {
 
 export const generateAIColors = async (keyword: string): Promise<string[]> => {
   try {
+    // First check if we have a predefined palette
+    if (keyword.toLowerCase() in THEME_COLORS) {
+      return THEME_COLORS[keyword.toLowerCase()];
+    }
+
+    // If not, try to generate one with AI
     const response = await fetch('/api/generate-colors', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -17,6 +23,7 @@ export const generateAIColors = async (keyword: string): Promise<string[]> => {
     });
     
     if (!response.ok) {
+      console.error('Failed to generate colors:', await response.text());
       throw new Error('Failed to generate colors');
     }
     
