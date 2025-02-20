@@ -35,17 +35,16 @@ const PaletteGenerator = () => {
   };
 
   const handleSave = () => {
-    // TODO: Implement save functionality
     toast({
       title: "Coming Soon!",
-      description: "Save functionality will be available after login.",
+      description: "Save functionality will be available after connecting to Supabase.",
     });
   };
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-8 animate-fade-in">
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
+        <h1 className="text-4xl font-bold tracking-tight text-black">
           Color Vibe
         </h1>
         <p className="text-lg text-gray-600">
@@ -59,12 +58,12 @@ const PaletteGenerator = () => {
           placeholder="Try 'sunset', 'ocean', or 'forest'..."
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
-          className="glass-morphism flex-1"
+          className="flex-1"
         />
         <div className="flex gap-2">
           <Button
             type="submit"
-            className="flex-1 sm:flex-none bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
+            className="flex-1 sm:flex-none bg-black text-white hover:bg-black/90"
             disabled={isGenerating}
           >
             <Wand2 className={`mr-2 h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
