@@ -4,8 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 
 const Signup = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Will implement signup logic after Supabase connection
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900">Create an account</h2>
@@ -13,7 +18,7 @@ const Signup = () => {
             Start creating and saving your color palettes
           </p>
         </div>
-        <form className="mt-8 space-y-6">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="text-sm font-medium text-gray-700">
@@ -56,13 +61,13 @@ const Signup = () => {
             </div>
           </div>
 
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full bg-black text-white hover:bg-black/90">
             Create account
           </Button>
 
           <p className="text-center text-sm text-gray-600">
             Already have an account?{" "}
-            <Link to="/login" className="font-medium text-purple-600 hover:text-purple-500">
+            <Link to="/login" className="font-medium text-black hover:text-gray-700">
               Sign in
             </Link>
           </p>

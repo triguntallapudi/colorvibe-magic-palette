@@ -4,7 +4,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -66,93 +65,101 @@ const PaletteDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
-          <DialogTitle>Edit Palette</DialogTitle>
-          <DialogDescription>
-            Click on a color to edit it using the sliders below.
-          </DialogDescription>
+          <DialogTitle className="text-2xl font-bold">Edit Color</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-6">
-          <div className="grid grid-cols-5 gap-4">
+
+        <div className="space-y-6 py-4">
+          <div className="grid grid-cols-5 gap-3">
             {editablePalette.map((color, index) => (
-              <div
+              <button
                 key={index}
-                className={`cursor-pointer transition-all ${
-                  selectedColor === index ? 'ring-2 ring-black' : ''
+                className={`h-12 rounded-lg transition-all ${
+                  selectedColor === index ? 'ring-2 ring-black ring-offset-2' : ''
                 }`}
+                style={{ backgroundColor: color }}
                 onClick={() => {
                   setSelectedColor(index);
                   setRgb(hexToRgb(color));
                 }}
-              >
-                <ColorCard
-                  color={color}
-                  shape="circle"
-                  showHex={true}
-                />
-              </div>
+              />
             ))}
           </div>
 
-          <Tabs defaultValue="rgb" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="rgb">RGB</TabsTrigger>
-              <TabsTrigger value="hex">Hex</TabsTrigger>
-            </TabsList>
-            <TabsContent value="rgb" className="space-y-4">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Red</label>
-                  <Slider
-                    min={0}
-                    max={255}
-                    step={1}
-                    value={[rgb.r]}
-                    onValueChange={([r]) => handleColorChange({ ...rgb, r })}
-                    className="[&_[role=slider]]:bg-red-500"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Green</label>
-                  <Slider
-                    min={0}
-                    max={255}
-                    step={1}
-                    value={[rgb.g]}
-                    onValueChange={([g]) => handleColorChange({ ...rgb, g })}
-                    className="[&_[role=slider]]:bg-green-500"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Blue</label>
-                  <Slider
-                    min={0}
-                    max={255}
-                    step={1}
-                    value={[rgb.b]}
-                    onValueChange={([b]) => handleColorChange({ ...rgb, b })}
-                    className="[&_[role=slider]]:bg-blue-500"
-                  />
-                </div>
-              </div>
-            </TabsContent>
-            <TabsContent value="hex">
-              <Input
-                type="text"
-                value={editablePalette[selectedColor]}
-                onChange={(e) => {
-                  const newPalette = [...editablePalette];
-                  newPalette[selectedColor] = e.target.value;
-                  setEditablePalette(newPalette);
-                  setRgb(hexToRgb(e.target.value));
-                }}
-                className="font-mono"
-              />
-            </TabsContent>
-          </Tabs>
+          <div className="p-4 rounded-lg bg-gray-50">
+            <div className="h-24 mb-4 rounded-lg" style={{ backgroundColor: editablePalette[selectedColor] }} />
+            
+            <Tabs defaultValue="rgb" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="rgb">RGB</TabsTrigger>
+                <TabsTrigger value="hex">HEX</TabsTrigger>
+              </TabsList>
 
-          <Button onClick={handleSave} className="mt-4 w-full bg-black text-white hover:bg-black/90">
+              <TabsContent value="rgb" className="space-y-4">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <label className="text-sm font-medium">Red</label>
+                      <span className="text-sm text-gray-500">{rgb.r}</span>
+                    </div>
+                    <Slider
+                      min={0}
+                      max={255}
+                      step={1}
+                      value={[rgb.r]}
+                      onValueChange={([r]) => handleColorChange({ ...rgb, r })}
+                      className="[&_[role=slider]]:bg-red-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <label className="text-sm font-medium">Green</label>
+                      <span className="text-sm text-gray-500">{rgb.g}</span>
+                    </div>
+                    <Slider
+                      min={0}
+                      max={255}
+                      step={1}
+                      value={[rgb.g]}
+                      onValueChange={([g]) => handleColorChange({ ...rgb, g })}
+                      className="[&_[role=slider]]:bg-green-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <label className="text-sm font-medium">Blue</label>
+                      <span className="text-sm text-gray-500">{rgb.b}</span>
+                    </div>
+                    <Slider
+                      min={0}
+                      max={255}
+                      step={1}
+                      value={[rgb.b]}
+                      onValueChange={([b]) => handleColorChange({ ...rgb, b })}
+                      className="[&_[role=slider]]:bg-blue-500"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="hex">
+                <Input
+                  type="text"
+                  value={editablePalette[selectedColor]}
+                  onChange={(e) => {
+                    const newPalette = [...editablePalette];
+                    newPalette[selectedColor] = e.target.value;
+                    setEditablePalette(newPalette);
+                    setRgb(hexToRgb(e.target.value));
+                  }}
+                  className="font-mono text-center"
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          <Button onClick={handleSave} className="w-full bg-black text-white hover:bg-black/90">
             Save Changes
           </Button>
         </div>
