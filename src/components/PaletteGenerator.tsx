@@ -4,8 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import ColorCard from './ColorCard';
 import PaletteDialog from './PaletteDialog';
-import { Wand2 } from 'lucide-react';
+import { Wand2, Save } from 'lucide-react';
 import { THEME_COLORS, generateAIColors } from '@/lib/colors';
+import { toast } from '@/components/ui/use-toast';
 
 const PaletteGenerator = () => {
   const [keyword, setKeyword] = useState('');
@@ -33,34 +34,55 @@ const PaletteGenerator = () => {
     generatePalette();
   };
 
+  const handleSave = () => {
+    // TODO: Implement save functionality
+    toast({
+      title: "Coming Soon!",
+      description: "Save functionality will be available after login.",
+    });
+  };
+
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-8 space-y-12 animate-fade-in">
+    <div className="w-full max-w-4xl mx-auto space-y-8 animate-fade-in">
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight">Color Vibe</h1>
+        <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
+          Color Vibe
+        </h1>
         <p className="text-lg text-gray-600">
           Transform your vision into vibrant color palettes
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex gap-4 max-w-xl mx-auto">
+      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
         <Input
           type="text"
-          placeholder="Try 'tree', 'ocean', or 'sunset'..."
+          placeholder="Try 'sunset', 'ocean', or 'forest'..."
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
-          className="glass-morphism"
+          className="glass-morphism flex-1"
         />
-        <Button
-          type="submit"
-          className="bg-black text-white hover:bg-black/90 px-8"
-          disabled={isGenerating}
-        >
-          <Wand2 className={`mr-2 h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
-          Generate
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            type="submit"
+            className="flex-1 sm:flex-none bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
+            disabled={isGenerating}
+          >
+            <Wand2 className={`mr-2 h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
+            Generate
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleSave}
+            className="flex-1 sm:flex-none"
+          >
+            <Save className="mr-2 h-4 w-4" />
+            Save
+          </Button>
+        </div>
       </form>
 
-      <div className="grid grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-6">
         {currentPalette.map((color, index) => (
           <ColorCard
             key={`${color}-${index}`}
