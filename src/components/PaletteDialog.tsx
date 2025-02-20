@@ -67,7 +67,7 @@ const PaletteDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Edit Color</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-black">Edit Color</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
@@ -87,8 +87,8 @@ const PaletteDialog = ({
             ))}
           </div>
 
-          <div className="p-4 rounded-lg bg-gray-50">
-            <div className="h-24 mb-4 rounded-lg" style={{ backgroundColor: editablePalette[selectedColor] }} />
+          <div className="p-4 rounded-lg bg-gray-50 border border-gray-100">
+            <div className="h-24 mb-4 rounded-lg shadow-sm" style={{ backgroundColor: editablePalette[selectedColor] }} />
             
             <Tabs defaultValue="rgb" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-4">
@@ -100,7 +100,7 @@ const PaletteDialog = ({
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <label className="text-sm font-medium">Red</label>
+                      <label className="text-sm font-medium text-gray-700">Red</label>
                       <span className="text-sm text-gray-500">{rgb.r}</span>
                     </div>
                     <Slider
@@ -114,7 +114,7 @@ const PaletteDialog = ({
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <label className="text-sm font-medium">Green</label>
+                      <label className="text-sm font-medium text-gray-700">Green</label>
                       <span className="text-sm text-gray-500">{rgb.g}</span>
                     </div>
                     <Slider
@@ -128,7 +128,7 @@ const PaletteDialog = ({
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <label className="text-sm font-medium">Blue</label>
+                      <label className="text-sm font-medium text-gray-700">Blue</label>
                       <span className="text-sm text-gray-500">{rgb.b}</span>
                     </div>
                     <Slider
