@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,8 @@ import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/supabase';
 
 const PaletteGenerator = () => {
-  const [currentPalette, setCurrentPalette] = useState<string[]>(THEME_COLORS);
+  console.log("PaletteGenerator mounting...");
+  const [currentPalette, setCurrentPalette] = useState<string[]>(THEME_COLORS.default);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,8 +19,10 @@ const PaletteGenerator = () => {
     setLoading(true);
     try {
       const colors = await generateAIColors(prompt);
+      console.log("Generated colors:", colors);
       setCurrentPalette(colors);
     } catch (error) {
+      console.error("Color generation error:", error);
       toast({
         title: "Error",
         description: "Failed to generate colors",
@@ -67,6 +69,8 @@ const PaletteGenerator = () => {
       });
     }
   };
+
+  console.log("Current palette:", currentPalette);
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-12 animate-fade-in pb-16">
