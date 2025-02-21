@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,9 @@ const PaletteGenerator = () => {
     setLoading(true);
     try {
       const colors = await generateAIColors(prompt);
-      setCurrentPalette(colors);
+      if (Array.isArray(colors)) {
+        setCurrentPalette(colors);
+      }
     } catch (error) {
       toast({
         title: "Error",
