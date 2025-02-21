@@ -1,40 +1,78 @@
 
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { toast } from '@/components/ui/use-toast';
+
+interface SavedPalette {
+  id: number;
+  name: string;
+  colors: string[];
+  created_at: string;
+}
 
 const Saved = () => {
-  // Will fetch saved palettes after Supabase connection
-  const savedPalettes: string[][] = [];
+  const [palettes, setPalettes] = useState<SavedPalette[]>([]);
+
+  useEffect(() => {
+    const fetchPalettes = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Please log in",
+          description: "You need to be logged in to view saved palettes",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('palettes')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load palettes",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setPalettes(data);
+    };
+
+    fetchPalettes();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-white px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <Link to="/">
-            <Button variant="ghost" className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Generator
-            </Button>
-          </Link>
-          <h1 className="text-2xl font-bold">Saved Palettes</h1>
-        </div>
-
-        {savedPalettes.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No saved palettes yet</p>
-            <Link to="/">
-              <Button className="bg-black text-white hover:bg-black/90">
-                Create Your First Palette
-              </Button>
-            </Link>
+    <div className="container mx-auto py-16 px-4">
+      <h1 className="text-3xl font-bold mb-8">Saved Palettes</h1>
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {palettes.map((palette) => (
+          <div key={palette.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="h-32 grid grid-cols-5">
+              {palette.colors.map((color, index) => (
+                <div
+                  key={index}
+                  style={{ backgroundColor: color }}
+                  className="h-full"
+                />
+              ))}
+            </div>
+            <div className="p-4">
+              <h3 className="font-medium text-gray-900">{palette.name}</h3>
+              <p className="text-sm text-gray-500">
+                {new Date(palette.created_at).toLocaleDateString()}
+              </p>
+            </div>
           </div>
-        ) : (
-          <div className="grid gap-8">
-            {/* Will map through saved palettes here */}
-          </div>
-        )}
+        ))}
       </div>
+      {palettes.length === 0 && (
+        <p className="text-center text-gray-500">No saved palettes yet</p>
+      )}
     </div>
   );
 };

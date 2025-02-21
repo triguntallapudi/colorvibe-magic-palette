@@ -6,88 +6,114 @@ import PaletteDialog from './PaletteDialog';
 import { Wand2, Save } from 'lucide-react';
 import { THEME_COLORS, generateAIColors } from '@/lib/colors';
 import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/lib/supabase';
 
 const PaletteGenerator = () => {
-  const [keyword, setKeyword] = useState('');
-  const [currentPalette, setCurrentPalette] = useState<string[]>(THEME_COLORS.default);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [currentPalette, setCurrentPalette] = useState<string[]>(THEME_COLORS);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [prompt, setPrompt] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const generatePalette = async () => {
-    if (!keyword.trim()) return;
-    
-    setIsGenerating(true);
+  const handleGenerate = async () => {
+    setLoading(true);
     try {
-      const colors = await generateAIColors(keyword);
+      const colors = await generateAIColors(prompt);
       setCurrentPalette(colors);
     } catch (error) {
-      console.error('Error generating palette:', error);
-      setCurrentPalette(THEME_COLORS.default);
-    } finally {
-      setIsGenerating(false);
+      toast({
+        title: "Error",
+        description: "Failed to generate colors",
+        variant: "destructive",
+      });
     }
+    setLoading(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    generatePalette();
-  };
+  const handleSave = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Please log in",
+          description: "You need to be logged in to save palettes",
+          variant: "destructive",
+        });
+        return;
+      }
 
-  const handleSave = () => {
-    toast({
-      title: "Coming Soon!",
-      description: "Save functionality will be available after connecting to Supabase.",
-    });
+      const { error } = await supabase
+        .from('palettes')
+        .insert([
+          {
+            user_id: user.id,
+            colors: currentPalette,
+            name: prompt || 'Untitled Palette',
+          },
+        ]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Palette saved successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save palette",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-12 animate-fade-in pb-16">
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold tracking-tight text-black">
-          Color Vibe
+          ColorVibe
         </h1>
         <p className="text-lg text-gray-600">
           Transform your vision into vibrant color palettes
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
-        <Input
-          type="text"
-          placeholder="Try 'sunset', 'ocean', or 'forest'..."
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          className="flex-1"
-        />
-        <div className="flex gap-2">
+      <div className="space-y-4">
+        <div className="flex gap-4">
+          <Input
+            placeholder="Describe your palette..."
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+          />
           <Button
-            type="submit"
-            className="flex-1 sm:flex-none bg-black text-white hover:bg-black/90"
-            disabled={isGenerating}
+            onClick={handleGenerate}
+            className="bg-black text-white hover:bg-black/90"
+            disabled={loading}
           >
-            <Wand2 className={`mr-2 h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
+            <Wand2 className="mr-2 h-4 w-4" />
             Generate
           </Button>
           <Button
-            type="button"
-            variant="outline"
             onClick={handleSave}
-            className="flex-1 sm:flex-none"
+            variant="outline"
+            className="border-gray-200"
           >
             <Save className="mr-2 h-4 w-4" />
             Save
           </Button>
         </div>
-      </form>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-6">
-        {currentPalette.map((color, index) => (
-          <ColorCard
-            key={`${color}-${index}`}
-            color={color}
-            onPaletteEdit={() => setDialogOpen(true)}
-          />
-        ))}
+        <div className="grid grid-cols-5 gap-4">
+          {currentPalette.map((color, index) => (
+            <ColorCard
+              key={index}
+              color={color}
+              onClick={() => {
+                setDialogOpen(true);
+              }}
+            />
+          ))}
+        </div>
       </div>
 
       <div className="mt-16 border-t pt-16">
