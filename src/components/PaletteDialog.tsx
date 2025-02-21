@@ -1,4 +1,3 @@
-
 import {
   Dialog,
   DialogContent,
@@ -35,6 +34,93 @@ const rgbToHex = (r: number, g: number, b: number) => {
   }).join("");
 };
 
+const rgbToHsb = (r: number, g: number, b: number) => {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const diff = max - min;
+
+  let h = 0;
+  let s = max === 0 ? 0 : diff / max;
+  let v = max;
+
+  if (diff !== 0) {
+    switch (max) {
+      case r:
+        h = (g - b) / diff + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / diff + 2;
+        break;
+      case b:
+        h = (r - g) / diff + 4;
+        break;
+    }
+    h /= 6;
+  }
+
+  return { h: h * 360, s: s * 100, b: v * 100 };
+};
+
+const hsbToRgb = (h: number, s: number, v: number) => {
+  h /= 360;
+  s /= 100;
+  v /= 100;
+
+  let r, g, b;
+  const i = Math.floor(h * 6);
+  const f = h * 6 - i;
+  const p = v * (1 - s);
+  const q = v * (1 - f * s);
+  const t = v * (1 - (1 - f) * s);
+
+  switch (i % 6) {
+    case 0:
+      r = v;
+      g = t;
+      b = p;
+      break;
+    case 1:
+      r = q;
+      g = v;
+      b = p;
+      break;
+    case 2:
+      r = p;
+      g = v;
+      b = t;
+      break;
+    case 3:
+      r = p;
+      g = q;
+      b = v;
+      break;
+    case 4:
+      r = t;
+      g = p;
+      b = v;
+      break;
+    case 5:
+      r = v;
+      g = p;
+      b = q;
+      break;
+    default:
+      r = 0;
+      g = 0;
+      b = 0;
+  }
+
+  return {
+    r: Math.round(r * 255),
+    g: Math.round(g * 255),
+    b: Math.round(b * 255),
+  };
+};
+
 const PaletteDialog = ({
   open,
   onOpenChange,
@@ -44,10 +130,12 @@ const PaletteDialog = ({
   const [editablePalette, setEditablePalette] = useState(palette);
   const [selectedColor, setSelectedColor] = useState(0);
   const [rgb, setRgb] = useState(hexToRgb(palette[0]));
+  const [hsb, setHsb] = useState(rgbToHsb(rgb.r, rgb.g, rgb.b));
 
   useEffect(() => {
     setEditablePalette(palette);
     setRgb(hexToRgb(palette[selectedColor]));
+    setHsb(rgbToHsb(rgb.r, rgb.g, rgb.b));
   }, [palette, selectedColor]);
 
   const handleColorChange = (rgb: { r: number, g: number, b: number }) => {
@@ -56,6 +144,26 @@ const PaletteDialog = ({
     newPalette[selectedColor] = newColor;
     setEditablePalette(newPalette);
     setRgb(rgb);
+    setHsb(rgbToHsb(rgb.r, rgb.g, rgb.b));
+  };
+
+  const handleRgbChange = (newRgb: { r: number; g: number; b: number }) => {
+    const newColor = rgbToHex(newRgb.r, newRgb.g, newRgb.b);
+    const newPalette = [...editablePalette];
+    newPalette[selectedColor] = newColor;
+    setEditablePalette(newPalette);
+    setRgb(newRgb);
+    setHsb(rgbToHsb(newRgb.r, newRgb.g, newRgb.b));
+  };
+
+  const handleHsbChange = (newHsb: { h: number; s: number; b: number }) => {
+    const newRgb = hsbToRgb(newHsb.h, newHsb.s, newHsb.b);
+    const newColor = rgbToHex(newRgb.r, newRgb.g, newRgb.b);
+    const newPalette = [...editablePalette];
+    newPalette[selectedColor] = newColor;
+    setEditablePalette(newPalette);
+    setRgb(newRgb);
+    setHsb(newHsb);
   };
 
   const handleSave = () => {
@@ -91,8 +199,9 @@ const PaletteDialog = ({
             <div className="h-24 mb-4 rounded-lg shadow-sm" style={{ backgroundColor: editablePalette[selectedColor] }} />
             
             <Tabs defaultValue="rgb" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsList className="grid w-full grid-cols-3 mb-4">
                 <TabsTrigger value="rgb">RGB</TabsTrigger>
+                <TabsTrigger value="hsb">HSB</TabsTrigger>
                 <TabsTrigger value="hex">HEX</TabsTrigger>
               </TabsList>
 
@@ -143,6 +252,51 @@ const PaletteDialog = ({
                 </div>
               </TabsContent>
 
+              <TabsContent value="hsb" className="space-y-4">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <label className="text-sm font-medium text-gray-700">Hue</label>
+                      <span className="text-sm text-gray-500">{Math.round(hsb.h)}°</span>
+                    </div>
+                    <Slider
+                      min={0}
+                      max={360}
+                      step={1}
+                      value={[hsb.h]}
+                      onValueChange={([h]) => handleHsbChange({ ...hsb, h })}
+                      className="[&_[role=slider]]:bg-gradient-to-r from-red-500 via-yellow-500 to-red-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <label className="text-sm font-medium text-gray-700">Saturation</label>
+                      <span className="text-sm text-gray-500">{Math.round(hsb.s)}%</span>
+                    </div>
+                    <Slider
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={[hsb.s]}
+                      onValueChange={([s]) => handleHsbChange({ ...hsb, s })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <label className="text-sm font-medium text-gray-700">Brightness</label>
+                      <span className="text-sm text-gray-500">{Math.round(hsb.b)}%</span>
+                    </div>
+                    <Slider
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={[hsb.b]}
+                      onValueChange={([b]) => handleHsbChange({ ...hsb, b })}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
               <TabsContent value="hex">
                 <Input
                   type="text"
@@ -151,7 +305,9 @@ const PaletteDialog = ({
                     const newPalette = [...editablePalette];
                     newPalette[selectedColor] = e.target.value;
                     setEditablePalette(newPalette);
-                    setRgb(hexToRgb(e.target.value));
+                    const newRgb = hexToRgb(e.target.value);
+                    setRgb(newRgb);
+                    setHsb(rgbToHsb(newRgb.r, newRgb.g, newRgb.b));
                   }}
                   className="font-mono text-center"
                 />

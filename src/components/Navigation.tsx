@@ -1,11 +1,17 @@
-
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, LogIn, UserPlus, Save, Palette } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+  };
 
   return (
     <nav className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
@@ -13,8 +19,8 @@ const Navigation = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <Palette className="h-6 w-6 text-purple-600" />
-              <span className="text-xl font-bold text-gray-900">ColorVibe</span>
+              <Palette className="h-6 w-6 text-black" />
+              <span className="text-xl font-bold text-black">ColorVibe</span>
             </Link>
           </div>
 
