@@ -1,13 +1,32 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, LogIn, UserPlus, Save, Palette } from 'lucide-react';
+import { Menu, LogIn, UserPlus, Save, Palette, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { User } from '@supabase/supabase-js';
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
   
+  useEffect(() => {
+    // Get initial user state
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/login');
@@ -37,24 +56,35 @@ const Navigation = () => {
 
           {/* Desktop menu */}
           <div className="hidden sm:flex sm:items-center sm:space-x-4">
-            <Button variant="ghost" asChild>
-              <Link to="/saved">
-                <Save className="mr-2 h-4 w-4" />
-                Saved Palettes
-              </Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link to="/login">
-                <LogIn className="mr-2 h-4 w-4" />
-                Login
-              </Link>
-            </Button>
-            <Button variant="default" asChild>
-              <Link to="/signup">
-                <UserPlus className="mr-2 h-4 w-4" />
-                Sign Up
-              </Link>
-            </Button>
+            {user ? (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link to="/saved">
+                    <Save className="mr-2 h-4 w-4" />
+                    Saved Palettes
+                  </Link>
+                </Button>
+                <Button variant="ghost" onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link to="/login">
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Login
+                  </Link>
+                </Button>
+                <Button variant="default" asChild>
+                  <Link to="/signup">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Sign Up
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
 
@@ -62,24 +92,35 @@ const Navigation = () => {
         {isMenuOpen && (
           <div className="sm:hidden pb-4">
             <div className="flex flex-col space-y-2">
-              <Button variant="ghost" asChild className="justify-start">
-                <Link to="/saved">
-                  <Save className="mr-2 h-4 w-4" />
-                  Saved Palettes
-                </Link>
-              </Button>
-              <Button variant="ghost" asChild className="justify-start">
-                <Link to="/login">
-                  <LogIn className="mr-2 h-4 w-4" />
-                  Login
-                </Link>
-              </Button>
-              <Button variant="default" asChild className="justify-start">
-                <Link to="/signup">
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Sign Up
-                </Link>
-              </Button>
+              {user ? (
+                <>
+                  <Button variant="ghost" asChild className="justify-start">
+                    <Link to="/saved">
+                      <Save className="mr-2 h-4 w-4" />
+                      Saved Palettes
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" onClick={handleLogout} className="justify-start">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" asChild className="justify-start">
+                    <Link to="/login">
+                      <LogIn className="mr-2 h-4 w-4" />
+                      Login
+                    </Link>
+                  </Button>
+                  <Button variant="default" asChild className="justify-start">
+                    <Link to="/signup">
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Sign Up
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         )}

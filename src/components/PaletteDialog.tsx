@@ -265,7 +265,7 @@ const PaletteDialog = ({
                       step={1}
                       value={[hsb.h]}
                       onValueChange={([h]) => handleHsbChange({ ...hsb, h })}
-                      className="[&_[role=slider]]:bg-gradient-to-r from-red-500 via-yellow-500 to-red-500"
+                      className="[&_[role=slider]]:bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-red-500"
                     />
                   </div>
                   <div className="space-y-2">
@@ -279,6 +279,7 @@ const PaletteDialog = ({
                       step={1}
                       value={[hsb.s]}
                       onValueChange={([s]) => handleHsbChange({ ...hsb, s })}
+                      className="[&_[role=slider]]:bg-gradient-to-r from-gray-300 to-blue-500"
                     />
                   </div>
                   <div className="space-y-2">
@@ -292,6 +293,7 @@ const PaletteDialog = ({
                       step={1}
                       value={[hsb.b]}
                       onValueChange={([b]) => handleHsbChange({ ...hsb, b })}
+                      className="[&_[role=slider]]:bg-gradient-to-r from-black to-white"
                     />
                   </div>
                 </div>
