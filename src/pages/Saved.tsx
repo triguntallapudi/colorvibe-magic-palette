@@ -2,6 +2,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { Home } from 'lucide-react';
 
 interface SavedPalette {
   id: number;
@@ -48,7 +51,15 @@ const Saved = () => {
 
   return (
     <div className="container mx-auto py-16 px-4">
-      <h1 className="text-3xl font-bold mb-8">Saved Palettes</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold">Saved Palettes</h1>
+        <Button asChild variant="outline">
+          <Link to="/">
+            <Home className="mr-2 h-4 w-4" />
+            Home
+          </Link>
+        </Button>
+      </div>
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {palettes.map((palette) => (
           <div key={palette.id} className="bg-white rounded-lg shadow-md overflow-hidden">

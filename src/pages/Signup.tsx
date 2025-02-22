@@ -14,6 +14,24 @@ const Signup = () => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "Invalid password",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -24,14 +42,14 @@ const Signup = () => {
 
       toast({
         title: "Welcome!",
-        description: "Account created successfully",
+        description: "Account created successfully. Please check your email for verification.",
       });
       
       navigate('/login');
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to create account",
+        description: error.message || "Failed to create account",
         variant: "destructive",
       });
     }
@@ -59,6 +77,7 @@ const Signup = () => {
                 autoComplete="email"
                 required
                 className="mt-1"
+                placeholder="you@example.com"
               />
             </div>
             <div>
@@ -72,6 +91,7 @@ const Signup = () => {
                 autoComplete="new-password"
                 required
                 className="mt-1"
+                placeholder="At least 6 characters"
               />
             </div>
           </div>

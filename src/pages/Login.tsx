@@ -14,6 +14,15 @@ const Login = () => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -28,10 +37,10 @@ const Login = () => {
       });
       
       navigate('/');
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Invalid email or password",
+        description: error.message || "Invalid email or password",
         variant: "destructive",
       });
     }
@@ -59,6 +68,7 @@ const Login = () => {
                 autoComplete="email"
                 required
                 className="mt-1"
+                placeholder="you@example.com"
               />
             </div>
             <div>
@@ -72,6 +82,7 @@ const Login = () => {
                 autoComplete="current-password"
                 required
                 className="mt-1"
+                placeholder="Enter your password"
               />
             </div>
           </div>
