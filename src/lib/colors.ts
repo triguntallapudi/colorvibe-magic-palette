@@ -8,6 +8,7 @@ export const THEME_COLORS: Record<string, string[]> = {
   forest: ['#228B22', '#145214', '#355E3B', '#4A5D23', '#8B7355'],
   grass: ['#55A630', '#2D5A27', '#3F7D20', '#72B01D', '#90B77D'],
   apple: ['#FF0000', '#8DB600', '#FFFF00', '#FF1E1E', '#FF4B4B'],
+  moon: ['#C0C0C0', '#D3D3D3', '#E6E6E6', '#F0F0F0', '#FFFFFF'],
   // Default palette (used as initial state)
   default: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD'],
 };
@@ -24,7 +25,7 @@ const findSimilarKeywords = (keyword: string): string => {
   const keywordGroups: Record<string, string[]> = {
     tree: ['wood', 'forest', 'plant'],
     ocean: ['water', 'sea', 'wave'],
-    grass: ['lawn', 'meadow', 'field']
+    grass: ['lawn', 'meadow', 'field'],
   };
 
   // Check if keyword is in any group
