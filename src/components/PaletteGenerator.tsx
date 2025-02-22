@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -89,7 +88,7 @@ const PaletteGenerator = () => {
       <div className="space-y-4">
         <div className="flex gap-4">
           <Input
-            placeholder="Describe your palette..."
+            placeholder="Try keywords like 'sunset' or 'ocean'..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             className="flex-1"

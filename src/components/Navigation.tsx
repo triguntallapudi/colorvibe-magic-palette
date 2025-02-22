@@ -2,22 +2,20 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, LogIn, UserPlus, Save, Palette, LogOut } from 'lucide-react';
+import { Menu, LogIn, UserPlus, Save, LogOut, User } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { User } from '@supabase/supabase-js';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Get initial user state
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
     });
 
-    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
     });
@@ -33,13 +31,12 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
+    <nav className="bg-black text-white fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <Palette className="h-6 w-6 text-black" />
-              <span className="text-xl font-bold text-black">ColorVibe</span>
+            <Link to="/" className="text-xl font-bold">
+              ColorVibe
             </Link>
           </div>
 
@@ -49,6 +46,7 @@ const Navigation = () => {
               variant="ghost"
               size="icon"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="text-white hover:bg-gray-800"
             >
               <Menu className="h-6 w-6" />
             </Button>
@@ -58,26 +56,30 @@ const Navigation = () => {
           <div className="hidden sm:flex sm:items-center sm:space-x-4">
             {user ? (
               <>
-                <Button variant="ghost" asChild>
+                <Button variant="ghost" asChild className="text-white hover:bg-gray-800">
                   <Link to="/saved">
                     <Save className="mr-2 h-4 w-4" />
                     Saved Palettes
                   </Link>
                 </Button>
-                <Button variant="ghost" onClick={handleLogout}>
+                <Button variant="ghost" className="text-white hover:bg-gray-800">
+                  <User className="mr-2 h-4 w-4" />
+                  {user.email}
+                </Button>
+                <Button variant="ghost" onClick={handleLogout} className="text-white hover:bg-gray-800">
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
                 </Button>
               </>
             ) : (
               <>
-                <Button variant="ghost" asChild>
+                <Button variant="ghost" asChild className="text-white hover:bg-gray-800">
                   <Link to="/login">
                     <LogIn className="mr-2 h-4 w-4" />
                     Login
                   </Link>
                 </Button>
-                <Button variant="default" asChild>
+                <Button variant="default" asChild className="bg-white text-black hover:bg-gray-100">
                   <Link to="/signup">
                     <UserPlus className="mr-2 h-4 w-4" />
                     Sign Up
@@ -94,26 +96,30 @@ const Navigation = () => {
             <div className="flex flex-col space-y-2">
               {user ? (
                 <>
-                  <Button variant="ghost" asChild className="justify-start">
+                  <Button variant="ghost" asChild className="justify-start text-white hover:bg-gray-800">
                     <Link to="/saved">
                       <Save className="mr-2 h-4 w-4" />
                       Saved Palettes
                     </Link>
                   </Button>
-                  <Button variant="ghost" onClick={handleLogout} className="justify-start">
+                  <Button variant="ghost" className="justify-start text-white hover:bg-gray-800">
+                    <User className="mr-2 h-4 w-4" />
+                    {user.email}
+                  </Button>
+                  <Button variant="ghost" onClick={handleLogout} className="justify-start text-white hover:bg-gray-800">
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" asChild className="justify-start">
+                  <Button variant="ghost" asChild className="justify-start text-white hover:bg-gray-800">
                     <Link to="/login">
                       <LogIn className="mr-2 h-4 w-4" />
                       Login
                     </Link>
                   </Button>
-                  <Button variant="default" asChild className="justify-start">
+                  <Button variant="default" asChild className="justify-start bg-white text-black hover:bg-gray-100">
                     <Link to="/signup">
                       <UserPlus className="mr-2 h-4 w-4" />
                       Sign Up
