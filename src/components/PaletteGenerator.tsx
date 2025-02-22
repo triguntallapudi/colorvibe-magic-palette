@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -70,10 +71,8 @@ const PaletteGenerator = () => {
     }
   };
 
-  console.log("Current palette:", currentPalette);
-
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-12 animate-fade-in pb-16">
+    <div className="w-full max-w-4xl mx-auto space-y-12">
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold tracking-tight text-black">
           ColorVibe
@@ -89,6 +88,7 @@ const PaletteGenerator = () => {
             placeholder="Describe your palette..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
+            className="flex-1"
           />
           <Button
             onClick={handleGenerate}
@@ -108,7 +108,7 @@ const PaletteGenerator = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {currentPalette.map((color, index) => (
             <ColorCard
               key={index}
