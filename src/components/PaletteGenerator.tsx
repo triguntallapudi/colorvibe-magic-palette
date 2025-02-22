@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import { Wand2, Save } from 'lucide-react';
 import { THEME_COLORS, generateAIColors } from '@/lib/colors';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/supabase';
-import { navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const PaletteGenerator = () => {
   console.log("PaletteGenerator mounting...");
@@ -15,6 +16,7 @@ const PaletteGenerator = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleGenerate = async () => {
     setLoading(true);
