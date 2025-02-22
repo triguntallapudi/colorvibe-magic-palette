@@ -9,7 +9,7 @@ export const THEME_COLORS: Record<string, string[]> = {
   grass: ['#55A630', '#2D5A27', '#3F7D20', '#72B01D', '#90B77D'],
   apple: ['#FF0000', '#8DB600', '#FFFF00', '#FF1E1E', '#FF4B4B'],
   // Default palette (used as initial state)
-  default: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD']
+  default: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD'],
 };
 
 const findSimilarKeywords = (keyword: string): string => {
