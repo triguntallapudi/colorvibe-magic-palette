@@ -10,8 +10,14 @@ import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 
 const PaletteGenerator = () => {
-  console.log("PaletteGenerator mounting...");
-  const [currentPalette, setCurrentPalette] = useState<string[]>(THEME_COLORS.default);
+  const [currentPalette, setCurrentPalette] = useState<string[]>(() => {
+    const editingPalette = localStorage.getItem('editingPalette');
+    if (editingPalette) {
+      localStorage.removeItem('editingPalette');
+      return JSON.parse(editingPalette);
+    }
+    return THEME_COLORS.default;
+  });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
@@ -64,6 +70,8 @@ const PaletteGenerator = () => {
         title: "Success!",
         description: "Palette saved successfully",
       });
+      
+      localStorage.removeItem('editingPalette');
     } catch (error: any) {
       console.error('Save error:', error);
       toast({
@@ -75,7 +83,7 @@ const PaletteGenerator = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-12">
+    <div className="w-full max-w-4xl mx-auto space-y-12 pt-28">
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold tracking-tight text-black">
           ColorVibe

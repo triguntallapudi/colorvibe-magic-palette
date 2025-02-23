@@ -3,8 +3,18 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Trash2, Edit2, Pencil } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from '@/components/ui/input';
 
 interface SavedPalette {
   id: number;
@@ -15,6 +25,9 @@ interface SavedPalette {
 
 const Saved = () => {
   const [palettes, setPalettes] = useState<SavedPalette[]>([]);
+  const [editingName, setEditingName] = useState('');
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchPalettes();
@@ -46,7 +59,7 @@ const Saved = () => {
       return;
     }
 
-    setPalettes(data);
+    setPalettes(data || []);
   };
 
   const handleDelete = async (id: number) => {
@@ -64,19 +77,50 @@ const Saved = () => {
       return;
     }
 
-    setPalettes(palettes.filter(palette => palette.id !== id));
+    await fetchPalettes(); // Refetch to ensure sync with database
     toast({
       title: "Success",
       description: "Palette deleted successfully",
     });
   };
 
+  const handleRename = async () => {
+    if (!editingId) return;
+
+    const { error } = await supabase
+      .from('palettes')
+      .update({ name: editingName })
+      .eq('id', editingId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to rename palette",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await fetchPalettes();
+    setEditingId(null);
+    toast({
+      title: "Success",
+      description: "Palette renamed successfully",
+    });
+  };
+
+  const handleEdit = (colors: string[]) => {
+    // Store colors in localStorage for the palette editor
+    localStorage.setItem('editingPalette', JSON.stringify(colors));
+    navigate('/');
+  };
+
   return (
-    <div className="container mx-auto pt-24 pb-16 px-4">
-      <div className="flex items-center gap-4 mb-12">
+    <div className="container mx-auto pt-28 pb-16 px-4">
+      <div className="flex items-center gap-6 mb-12">
         <Button asChild variant="ghost" className="p-0 hover:bg-transparent">
           <Link to="/">
-            <ArrowLeft className="h-6 w-6" />
+            <ArrowLeft className="h-8 w-8" />
           </Link>
         </Button>
         <h1 className="text-3xl font-bold">Saved Palettes</h1>
@@ -94,22 +138,63 @@ const Saved = () => {
                   />
                 ))}
               </div>
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center opacity-0 group-hover:opacity-100">
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleEdit(palette.colors)}
+                  className="rounded-full bg-white hover:bg-white/90"
+                >
+                  <Edit2 className="h-4 w-4 text-black" />
+                </Button>
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => handleDelete(palette.id)}
-                  className="rounded-full bg-black hover:bg-black/90"
+                  className="rounded-full bg-white hover:bg-white/90"
                 >
-                  <Trash2 className="h-4 w-4 text-white" />
+                  <Trash2 className="h-4 w-4 text-black" />
                 </Button>
               </div>
             </div>
             <div className="p-4">
-              <h3 className="font-medium text-gray-900">{palette.name}</h3>
-              <div className="mt-2 flex flex-wrap gap-2">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-medium text-gray-900">{palette.name}</h3>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setEditingName(palette.name);
+                        setEditingId(palette.id);
+                      }}
+                      className="hover:bg-transparent"
+                    >
+                      <Pencil className="h-4 w-4 text-gray-500" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Rename Palette</DialogTitle>
+                      <DialogDescription>
+                        Enter a new name for your palette
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Input
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      placeholder="Enter palette name"
+                    />
+                    <DialogFooter>
+                      <Button onClick={handleRename}>Save</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              <div className="grid grid-cols-5 gap-2">
                 {palette.colors.map((color, index) => (
-                  <span key={index} className="text-xs font-mono text-gray-500">
+                  <span key={index} className="text-xs font-mono text-gray-500 text-center">
                     {color}
                   </span>
                 ))}
