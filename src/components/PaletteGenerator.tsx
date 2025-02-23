@@ -59,7 +59,10 @@ const PaletteGenerator = () => {
         // Update existing palette
         const { error } = await supabase
           .from('palettes')
-          .update({ colors: currentPalette })
+          .update({
+            colors: currentPalette,
+            name: prompt || 'Untitled Palette'
+          })
           .eq('id', editingId);
 
         if (error) throw error;
@@ -68,6 +71,13 @@ const PaletteGenerator = () => {
           title: "Success!",
           description: "Palette updated successfully",
         });
+
+        // Clear editing state
+        localStorage.removeItem('editingPalette');
+        localStorage.removeItem('editingPaletteId');
+        
+        // Navigate back to saved palettes
+        navigate('/saved');
       } else {
         // Create new palette
         const { error } = await supabase
@@ -87,11 +97,6 @@ const PaletteGenerator = () => {
           description: "Palette saved successfully",
         });
       }
-      
-      // Clear editing state
-      localStorage.removeItem('editingPalette');
-      localStorage.removeItem('editingPaletteId');
-      
     } catch (error: any) {
       console.error('Save error:', error);
       toast({

@@ -78,7 +78,10 @@ const Saved = () => {
       return;
     }
 
-    setPalettes(palettes.filter(p => p.id !== id));
+    // Immediately update local state and fetch fresh data
+    setPalettes(current => current.filter(p => p.id !== id));
+    fetchPalettes(); // Fetch fresh data to ensure sync
+
     toast({
       title: "Success",
       description: "Palette deleted successfully",
@@ -102,10 +105,16 @@ const Saved = () => {
       return;
     }
 
-    setPalettes(palettes.map(p => 
+    // Update local state and fetch fresh data
+    setPalettes(current => current.map(p => 
       p.id === editingId ? { ...p, name: editingName } : p
     ));
+    fetchPalettes(); // Fetch fresh data to ensure sync
+
     setDialogOpen(false);
+    setEditingId(null);
+    setEditingName('');
+
     toast({
       title: "Success",
       description: "Palette renamed successfully",
@@ -121,16 +130,16 @@ const Saved = () => {
   return (
     <div className="container mx-auto pt-28 pb-16 px-4">
       <div className="flex items-center gap-6 mb-12">
-        <Button asChild variant="ghost" className="p-0 hover:bg-transparent flex items-center">
-          <Link to="/">
-            <ArrowLeft className="h-10 w-10" />
+        <Button asChild variant="ghost" className="p-0 hover:bg-transparent">
+          <Link to="/" className="flex items-center">
+            <ArrowLeft className="h-12 w-12 stroke-[1.5]" />
           </Link>
         </Button>
         <h1 className="text-3xl font-bold">Saved Palettes</h1>
       </div>
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {palettes.map((palette) => (
-          <div key={palette.id} className="bg-white rounded-xl overflow-hidden shadow hover:shadow-md transition-all">
+          <div key={palette.id} className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
             <div className="relative group">
               <div className="flex h-48">
                 {palette.colors.map((color, index) => (
@@ -177,7 +186,7 @@ const Saved = () => {
                       <Pencil className="h-4 w-4 text-gray-500" />
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="bg-white">
                     <DialogHeader>
                       <DialogTitle>Rename Palette</DialogTitle>
                       <DialogDescription>
