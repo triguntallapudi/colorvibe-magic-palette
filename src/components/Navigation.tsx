@@ -73,7 +73,10 @@ const Navigation = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-white hover:bg-gray-800 hover:text-white">
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:bg-gray-800 hover:text-white focus:ring-0 focus-visible:ring-0 focus:ring-offset-0"
+                  >
                     <User className="mr-2 h-4 w-4" />
                     Profile
                     <ChevronDown className="ml-2 h-4 w-4" />

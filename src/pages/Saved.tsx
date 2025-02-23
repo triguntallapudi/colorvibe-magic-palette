@@ -27,6 +27,7 @@ const Saved = () => {
   const [palettes, setPalettes] = useState<SavedPalette[]>([]);
   const [editingName, setEditingName] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -77,7 +78,7 @@ const Saved = () => {
       return;
     }
 
-    await fetchPalettes(); // Refetch to ensure sync with database
+    setPalettes(palettes.filter(p => p.id !== id));
     toast({
       title: "Success",
       description: "Palette deleted successfully",
@@ -101,33 +102,35 @@ const Saved = () => {
       return;
     }
 
-    await fetchPalettes();
-    setEditingId(null);
+    setPalettes(palettes.map(p => 
+      p.id === editingId ? { ...p, name: editingName } : p
+    ));
+    setDialogOpen(false);
     toast({
       title: "Success",
       description: "Palette renamed successfully",
     });
   };
 
-  const handleEdit = (colors: string[]) => {
-    // Store colors in localStorage for the palette editor
+  const handleEdit = (colors: string[], id: number) => {
     localStorage.setItem('editingPalette', JSON.stringify(colors));
+    localStorage.setItem('editingPaletteId', id.toString());
     navigate('/');
   };
 
   return (
     <div className="container mx-auto pt-28 pb-16 px-4">
       <div className="flex items-center gap-6 mb-12">
-        <Button asChild variant="ghost" className="p-0 hover:bg-transparent">
+        <Button asChild variant="ghost" className="p-0 hover:bg-transparent flex items-center">
           <Link to="/">
-            <ArrowLeft className="h-8 w-8" />
+            <ArrowLeft className="h-10 w-10" />
           </Link>
         </Button>
         <h1 className="text-3xl font-bold">Saved Palettes</h1>
       </div>
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {palettes.map((palette) => (
-          <div key={palette.id} className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+          <div key={palette.id} className="bg-white rounded-xl overflow-hidden shadow hover:shadow-md transition-all">
             <div className="relative group">
               <div className="flex h-48">
                 {palette.colors.map((color, index) => (
@@ -142,10 +145,10 @@ const Saved = () => {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => handleEdit(palette.colors)}
+                  onClick={() => handleEdit(palette.colors, palette.id)}
                   className="rounded-full bg-white hover:bg-white/90"
                 >
-                  <Edit2 className="h-4 w-4 text-black" />
+                  <Edit2 className="h-5 w-5 text-black" />
                 </Button>
                 <Button
                   variant="outline"
@@ -153,14 +156,14 @@ const Saved = () => {
                   onClick={() => handleDelete(palette.id)}
                   className="rounded-full bg-white hover:bg-white/90"
                 >
-                  <Trash2 className="h-4 w-4 text-black" />
+                  <Trash2 className="h-5 w-5 text-black" />
                 </Button>
               </div>
             </div>
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-medium text-gray-900">{palette.name}</h3>
-                <Dialog>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                   <DialogTrigger asChild>
                     <Button
                       variant="ghost"
@@ -192,7 +195,7 @@ const Saved = () => {
                   </DialogContent>
                 </Dialog>
               </div>
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-5 gap-4">
                 {palette.colors.map((color, index) => (
                   <span key={index} className="text-xs font-mono text-gray-500 text-center">
                     {color}

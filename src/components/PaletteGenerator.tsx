@@ -13,7 +13,6 @@ const PaletteGenerator = () => {
   const [currentPalette, setCurrentPalette] = useState<string[]>(() => {
     const editingPalette = localStorage.getItem('editingPalette');
     if (editingPalette) {
-      localStorage.removeItem('editingPalette');
       return JSON.parse(editingPalette);
     }
     return THEME_COLORS.default;
@@ -54,24 +53,45 @@ const PaletteGenerator = () => {
         return;
       }
 
-      const { error } = await supabase
-        .from('palettes')
-        .insert([
-          {
-            user_id: user.id,
-            colors: currentPalette,
-            name: prompt || 'Untitled Palette',
-          },
-        ]);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success!",
-        description: "Palette saved successfully",
-      });
+      const editingId = localStorage.getItem('editingPaletteId');
       
+      if (editingId) {
+        // Update existing palette
+        const { error } = await supabase
+          .from('palettes')
+          .update({ colors: currentPalette })
+          .eq('id', editingId);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success!",
+          description: "Palette updated successfully",
+        });
+      } else {
+        // Create new palette
+        const { error } = await supabase
+          .from('palettes')
+          .insert([
+            {
+              user_id: user.id,
+              colors: currentPalette,
+              name: prompt || 'Untitled Palette',
+            },
+          ]);
+
+        if (error) throw error;
+
+        toast({
+          title: "Success!",
+          description: "Palette saved successfully",
+        });
+      }
+      
+      // Clear editing state
       localStorage.removeItem('editingPalette');
+      localStorage.removeItem('editingPaletteId');
+      
     } catch (error: any) {
       console.error('Save error:', error);
       toast({
