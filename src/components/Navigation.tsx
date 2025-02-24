@@ -1,28 +1,17 @@
 
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useToast } from "@/components/ui/use-toast";
 
 const Navigation = () => {
   const { data: { user }, signOut } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
 
   const handleSignOut = async () => {
     await signOut();
-    // Don't navigate to login, just stay on current page
   };
 
   const [mounted, setMounted] = useState(false);
@@ -33,6 +22,21 @@ const Navigation = () => {
 
   if (!mounted) {
     return null;
+  }
+
+  // Don't show any buttons on login or signup pages
+  if (location.pathname === '/login' || location.pathname === '/signup') {
+    return (
+      <nav className="fixed top-0 left-0 right-0 bg-black text-white z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link to="/" className="text-xl font-bold">
+              ColorVibe
+            </Link>
+          </div>
+        </div>
+      </nav>
+    );
   }
 
   return (
@@ -64,20 +68,16 @@ const Navigation = () => {
               </DropdownMenu>
             ) : (
               <>
-                {location.pathname !== '/login' && (
-                  <Link to="/login">
-                    <Button variant="ghost" size="sm" className="text-white hover:text-white/90">
-                      Log In
-                    </Button>
-                  </Link>
-                )}
-                {location.pathname !== '/signup' && (
-                  <Link to="/signup">
-                    <Button size="sm" variant="outline" className="text-white border-white hover:bg-white/10">
-                      Sign Up
-                    </Button>
-                  </Link>
-                )}
+                <Link to="/login">
+                  <Button variant="ghost" size="sm" className="text-white hover:text-white/90">
+                    Log In
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button size="sm" variant="outline" className="text-white border-white hover:bg-white/10">
+                    Sign Up
+                  </Button>
+                </Link>
               </>
             )}
           </div>

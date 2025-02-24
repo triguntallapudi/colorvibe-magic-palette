@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/components/ui/use-toast';
@@ -63,59 +64,58 @@ const Saved = () => {
   };
 
   const handleDelete = async (id: number) => {
-    const { error } = await supabase
-      .from('palettes')
-      .delete()
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('palettes')
+        .delete()
+        .eq('id', id);
 
-    if (error) {
+      if (error) throw error;
+
+      setPalettes(current => current.filter(p => p.id !== id));
+      toast({
+        title: "Success",
+        description: "Palette deleted successfully",
+      });
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to delete palette",
         variant: "destructive",
       });
-      return;
     }
-
-    setPalettes(current => current.filter(p => p.id !== id));
-    fetchPalettes();
-
-    toast({
-      title: "Success",
-      description: "Palette deleted successfully",
-    });
   };
 
   const handleRename = async () => {
     if (!editingId) return;
 
-    const { error } = await supabase
-      .from('palettes')
-      .update({ name: editingName })
-      .eq('id', editingId);
+    try {
+      const { error } = await supabase
+        .from('palettes')
+        .update({ name: editingName })
+        .eq('id', editingId);
 
-    if (error) {
+      if (error) throw error;
+
+      setPalettes(current =>
+        current.map(p => p.id === editingId ? { ...p, name: editingName } : p)
+      );
+
+      setDialogOpen(false);
+      setEditingId(null);
+      setEditingName('');
+
+      toast({
+        title: "Success",
+        description: "Palette renamed successfully",
+      });
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to rename palette",
         variant: "destructive",
       });
-      return;
     }
-
-    setPalettes(current => current.map(p => 
-      p.id === editingId ? { ...p, name: editingName } : p
-    ));
-    fetchPalettes();
-
-    setDialogOpen(false);
-    setEditingId(null);
-    setEditingName('');
-
-    toast({
-      title: "Success",
-      description: "Palette renamed successfully",
-    });
   };
 
   const handleEdit = (colors: string[], id: number) => {
@@ -125,18 +125,17 @@ const Saved = () => {
   };
 
   return (
-    <div className="container mx-auto pt-28 pb-16 px-4">
-      <div className="flex items-center gap-6 mb-12">
-        <Button asChild variant="ghost" className="p-0 hover:bg-transparent">
-          <Link to="/" className="flex items-center">
-            <ArrowLeft className="h-12 w-12 stroke-[1.5]" />
-          </Link>
-        </Button>
+    <div className="container mx-auto pt-24 pb-16 px-4">
+      <div className="flex items-center gap-4 mb-12">
+        <Link to="/" className="text-gray-600 hover:text-gray-900">
+          <ArrowLeft className="h-6 w-6" />
+        </Link>
         <h1 className="text-3xl font-bold">Saved Palettes</h1>
       </div>
+
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {palettes.map((palette) => (
-          <div key={palette.id} className="bg-white rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+          <div key={palette.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
             <div className="relative group">
               <div className="flex h-48">
                 {palette.colors.map((color, index) => (
@@ -166,10 +165,16 @@ const Saved = () => {
                 </Button>
               </div>
             </div>
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
+            <div className="p-4 border-t border-gray-100">
+              <div className="flex items-center justify-between">
                 <h3 className="font-medium text-gray-900">{palette.name}</h3>
-                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <Dialog open={dialogOpen && editingId === palette.id} onOpenChange={(open) => {
+                  setDialogOpen(open);
+                  if (!open) {
+                    setEditingId(null);
+                    setEditingName('');
+                  }
+                }}>
                   <DialogTrigger asChild>
                     <Button
                       variant="ghost"
@@ -201,7 +206,7 @@ const Saved = () => {
                   </DialogContent>
                 </Dialog>
               </div>
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-5 gap-4 mt-4">
                 {palette.colors.map((color, index) => (
                   <span key={index} className="text-xs font-mono text-gray-500 text-center">
                     {color}
