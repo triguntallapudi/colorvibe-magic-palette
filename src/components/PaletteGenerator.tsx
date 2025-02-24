@@ -49,7 +49,7 @@ const PaletteGenerator = () => {
           title: "Login Required",
           description: "You need to be logged in to save palettes",
           variant: "destructive",
-          className: "fixed bottom-4 right-4"
+          className: "w-auto h-auto p-4"
         });
         return;
       }
@@ -57,7 +57,6 @@ const PaletteGenerator = () => {
       const editingId = localStorage.getItem('editingPaletteId');
       
       if (editingId) {
-        // Update existing palette
         const { error } = await supabase
           .from('palettes')
           .update({
@@ -73,14 +72,11 @@ const PaletteGenerator = () => {
           description: "Palette updated successfully",
         });
 
-        // Clear editing state
         localStorage.removeItem('editingPalette');
         localStorage.removeItem('editingPaletteId');
         
-        // Navigate back to saved palettes
         navigate('/saved');
       } else {
-        // Create new palette
         const { error } = await supabase
           .from('palettes')
           .insert([
@@ -104,13 +100,13 @@ const PaletteGenerator = () => {
         title: "Error",
         description: "Failed to save palette. Please try again.",
         variant: "destructive",
-        className: "fixed bottom-4 right-4"
+        className: "w-auto h-auto p-4"
       });
     }
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-12 pt-20">
+    <div className="w-full max-w-4xl mx-auto space-y-12">
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold tracking-tight text-black">
           ColorVibe

@@ -1,3 +1,4 @@
+
 import {
   Sheet,
   SheetContent,
@@ -35,43 +36,54 @@ const Navigation = () => {
   }
 
   return (
-    <div className="flex items-center justify-end p-4">
-      {user ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email || "Avatar"} />
-                <AvatarFallback>{user?.email?.[0].toUpperCase()}</AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 mr-4">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/saved">Saved Palettes</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : (
-        <>
-          {location.pathname !== '/login' && (
-            <Link to="/login">
-              <Button variant="outline" size="sm" className="mr-2">
-                Log In
-              </Button>
-            </Link>
-          )}
-          {location.pathname !== '/signup' && (
-            <Link to="/signup">
-              <Button size="sm">Sign Up</Button>
-            </Link>
-          )}
-        </>
-      )}
-    </div>
+    <nav className="fixed top-0 left-0 right-0 bg-black text-white z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          <Link to="/" className="text-xl font-bold">
+            ColorVibe
+          </Link>
+          <div className="flex items-center gap-4">
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email || "Avatar"} />
+                      <AvatarFallback>{user?.email?.[0].toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/saved">Saved Palettes</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                {location.pathname !== '/login' && (
+                  <Link to="/login">
+                    <Button variant="ghost" size="sm" className="text-white hover:text-white/90">
+                      Log In
+                    </Button>
+                  </Link>
+                )}
+                {location.pathname !== '/signup' && (
+                  <Link to="/signup">
+                    <Button size="sm" variant="outline" className="text-white border-white hover:bg-white/10">
+                      Sign Up
+                    </Button>
+                  </Link>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </nav>
   );
 };
 
