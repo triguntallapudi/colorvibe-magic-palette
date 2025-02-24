@@ -45,10 +45,12 @@ const PaletteGenerator = () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        const shouldLogin = window.confirm("You need to be logged in to save palettes. Would you like to log in?");
-        if (shouldLogin) {
-          navigate('/login');
-        }
+        toast({
+          title: "Login Required",
+          description: "You need to be logged in to save palettes",
+          variant: "destructive",
+          className: "fixed bottom-4 right-4"
+        });
         return;
       }
 
@@ -102,6 +104,7 @@ const PaletteGenerator = () => {
         title: "Error",
         description: "Failed to save palette. Please try again.",
         variant: "destructive",
+        className: "fixed bottom-4 right-4"
       });
     }
   };
