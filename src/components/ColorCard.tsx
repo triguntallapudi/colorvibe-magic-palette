@@ -5,14 +5,16 @@ import { Copy } from 'lucide-react';
 
 interface ColorCardProps {
   color: string;
+  index?: number;
   shape?: 'pill' | 'circle';
   showHex?: boolean;
-  onClick?: () => void;
+  onClick?: (index: number) => void;
   onPaletteEdit?: () => void;
 }
 
 const ColorCard = ({ 
   color, 
+  index = 0,
   shape = 'pill', 
   showHex = true, 
   onClick, 
@@ -23,7 +25,7 @@ const ColorCard = ({
     if (onPaletteEdit) {
       onPaletteEdit();
     } else if (onClick) {
-      onClick();
+      onClick(index);
     }
   };
 

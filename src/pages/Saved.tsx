@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/components/ui/use-toast';
@@ -78,9 +77,8 @@ const Saved = () => {
       return;
     }
 
-    // Immediately update local state and fetch fresh data
     setPalettes(current => current.filter(p => p.id !== id));
-    fetchPalettes(); // Fetch fresh data to ensure sync
+    fetchPalettes();
 
     toast({
       title: "Success",
@@ -105,11 +103,10 @@ const Saved = () => {
       return;
     }
 
-    // Update local state and fetch fresh data
     setPalettes(current => current.map(p => 
       p.id === editingId ? { ...p, name: editingName } : p
     ));
-    fetchPalettes(); // Fetch fresh data to ensure sync
+    fetchPalettes();
 
     setDialogOpen(false);
     setEditingId(null);
@@ -139,7 +136,7 @@ const Saved = () => {
       </div>
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {palettes.map((palette) => (
-          <div key={palette.id} className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
+          <div key={palette.id} className="bg-white rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl">
             <div className="relative group">
               <div className="flex h-48">
                 {palette.colors.map((color, index) => (

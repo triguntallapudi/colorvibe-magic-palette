@@ -20,6 +20,7 @@ const PaletteGenerator = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const navigate = useNavigate();
 
   const handleGenerate = async () => {
@@ -44,12 +45,10 @@ const PaletteGenerator = () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        toast({
-          title: "Please log in",
-          description: "You need to be logged in to save palettes",
-          variant: "destructive",
-        });
-        navigate('/login');
+        const shouldLogin = window.confirm("You need to be logged in to save palettes. Would you like to log in?");
+        if (shouldLogin) {
+          navigate('/login');
+        }
         return;
       }
 
@@ -108,7 +107,7 @@ const PaletteGenerator = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-12 pt-24">
+    <div className="w-full max-w-4xl mx-auto space-y-12 pt-20">
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold tracking-tight text-black">
           ColorVibe
@@ -149,7 +148,9 @@ const PaletteGenerator = () => {
             <ColorCard
               key={index}
               color={color}
-              onClick={() => {
+              index={index}
+              onClick={(idx) => {
+                setSelectedColorIndex(idx);
                 setDialogOpen(true);
               }}
             />
@@ -184,6 +185,7 @@ const PaletteGenerator = () => {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         palette={currentPalette}
+        selectedColorIndex={selectedColorIndex}
         onPaletteChange={setCurrentPalette}
       />
     </div>
