@@ -1,8 +1,8 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Link, useLocation } from "react-router-dom";
+import { UserRound, BookmarkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -48,33 +48,47 @@ const Navigation = () => {
           </Link>
           <div className="flex items-center gap-4">
             {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email || "Avatar"} />
-                      <AvatarFallback>{user?.email?.[0].toUpperCase()}</AvatarFallback>
-                    </Avatar>
+              <>
+                <Link to="/saved">
+                  <Button variant="ghost" size="sm" className="text-white hover:text-white/90">
+                    <BookmarkIcon className="h-5 w-5 mr-2" />
+                    Saved Palettes
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/saved">Saved Palettes</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="text-white hover:text-white/90">
+                      <UserRound className="h-5 w-5 mr-2" />
+                      Profile
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>
+                      <div className="text-sm font-normal">{user.email}</div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="ghost" size="sm" className="text-white hover:text-white/90">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-white hover:bg-blue-900 hover:text-white transition-colors"
+                  >
                     Log In
                   </Button>
                 </Link>
                 <Link to="/signup">
-                  <Button size="sm" variant="outline" className="text-white border-white hover:bg-white/10">
+                  <Button 
+                    size="sm" 
+                    className="bg-white text-black hover:bg-gray-200 transition-colors"
+                  >
                     Sign Up
                   </Button>
                 </Link>

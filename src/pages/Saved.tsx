@@ -42,6 +42,7 @@ const Saved = () => {
         description: "You need to be logged in to view saved palettes",
         variant: "destructive",
       });
+      navigate('/login');
       return;
     }
 
@@ -72,7 +73,9 @@ const Saved = () => {
 
       if (error) throw error;
 
-      setPalettes(current => current.filter(p => p.id !== id));
+      // Refetch palettes after delete to ensure we have the latest data
+      await fetchPalettes();
+
       toast({
         title: "Success",
         description: "Palette deleted successfully",
@@ -97,9 +100,8 @@ const Saved = () => {
 
       if (error) throw error;
 
-      setPalettes(current =>
-        current.map(p => p.id === editingId ? { ...p, name: editingName } : p)
-      );
+      // Refetch palettes after rename to ensure we have the latest data
+      await fetchPalettes();
 
       setDialogOpen(false);
       setEditingId(null);
