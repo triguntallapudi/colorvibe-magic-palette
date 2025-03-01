@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ const Saved = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
+  const saveButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     fetchPalettes();
@@ -126,6 +127,13 @@ const Saved = () => {
     navigate('/');
   };
 
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && saveButtonRef.current) {
+      e.preventDefault();
+      saveButtonRef.current.click();
+    }
+  };
+
   return (
     <div className="container mx-auto pt-24 pb-16 px-4">
       <div className="flex items-center gap-4 mb-12">
@@ -137,7 +145,7 @@ const Saved = () => {
 
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {palettes.map((palette) => (
-          <div key={palette.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+          <div key={palette.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
             <div className="relative group">
               <div className="flex h-48">
                 {palette.colors.map((color, index) => (
@@ -167,7 +175,7 @@ const Saved = () => {
                 </Button>
               </div>
             </div>
-            <div className="p-4 border-t border-gray-100">
+            <div className="p-4 border-t border-gray-200">
               <div className="flex items-center justify-between">
                 <h3 className="font-medium text-gray-900">{palette.name}</h3>
                 <Dialog open={dialogOpen && editingId === palette.id} onOpenChange={(open) => {
@@ -200,10 +208,12 @@ const Saved = () => {
                     <Input
                       value={editingName}
                       onChange={(e) => setEditingName(e.target.value)}
+                      onKeyDown={handleInputKeyDown}
                       placeholder="Enter palette name"
+                      autoFocus
                     />
                     <DialogFooter>
-                      <Button onClick={handleRename}>Save</Button>
+                      <Button onClick={handleRename} ref={saveButtonRef}>Save</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>

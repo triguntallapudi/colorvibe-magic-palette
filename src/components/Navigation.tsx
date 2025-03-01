@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "react-router-dom";
-import { UserRound, BookmarkIcon } from "lucide-react";
+import { UserRound, BookmarkIcon, ChevronDown, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -46,28 +46,29 @@ const Navigation = () => {
           <Link to="/" className="text-xl font-bold">
             ColorVibe
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 mr-6">
             {user ? (
               <>
                 <Link to="/saved">
-                  <Button variant="ghost" size="sm" className="text-white hover:text-white/90">
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-800">
                     <BookmarkIcon className="h-5 w-5 mr-2" />
                     Saved Palettes
                   </Button>
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="text-white hover:text-white/90">
+                    <Button variant="ghost" size="sm" className="text-white hover:bg-gray-800">
                       <UserRound className="h-5 w-5 mr-2" />
                       Profile
+                      <ChevronDown className="h-4 w-4 ml-1" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>
-                      <div className="text-sm font-normal">{user.email}</div>
+                  <DropdownMenuContent align="end" className="bg-black text-white border-gray-700">
+                    <DropdownMenuLabel className="text-gray-400">
+                      <div className="text-sm font-normal text-gray-400">{user.email}</div>
                     </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut}>
+                    <DropdownMenuSeparator className="bg-gray-700" />
+                    <DropdownMenuItem onClick={handleSignOut} className="hover:bg-gray-800 text-white">
                       Sign out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -79,7 +80,7 @@ const Navigation = () => {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-white hover:bg-blue-900 hover:text-white transition-colors"
+                    className="text-white hover:bg-gray-800 transition-colors"
                   >
                     Log In
                   </Button>
