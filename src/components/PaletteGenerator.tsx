@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,6 @@ const PaletteGenerator = () => {
   const generateButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    // Check if we're editing a palette, and handle it properly
     const storedEditingPaletteId = localStorage.getItem('editingPaletteId');
     if (storedEditingPaletteId) {
       setEditingPaletteId(storedEditingPaletteId);
@@ -101,7 +99,6 @@ const PaletteGenerator = () => {
           description: "Palette updated successfully",
         });
 
-        // Clear localStorage after successful save
         localStorage.removeItem('editingPalette');
         localStorage.removeItem('editingPaletteId');
         setEditingPaletteId(null);

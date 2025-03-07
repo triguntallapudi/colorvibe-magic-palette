@@ -31,7 +31,9 @@ const Saved = () => {
   const navigate = useNavigate();
   const saveButtonRef = useRef<HTMLButtonElement>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastOperation, setLastOperation] = useState<{type: string, id?: number, timestamp: number} | null>(null);
 
+  // Enhanced fetchPalettes function that uses supabase directly each time
   const fetchPalettes = useCallback(async () => {
     setIsLoading(true);
     console.log("Fetching palettes...");
@@ -48,6 +50,7 @@ const Saved = () => {
         return;
       }
 
+      // Get fresh data directly from Supabase
       const { data, error } = await supabase
         .from('palettes')
         .select('*')
@@ -78,20 +81,36 @@ const Saved = () => {
     }
   }, [navigate]);
 
+  // Initial load and setup listeners
   useEffect(() => {
     fetchPalettes();
     
-    // Set up a listener for focus to refresh data when returning to this page
+    // Set up listeners for page visibility and focus to ensure data is fresh
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchPalettes();
+      }
+    };
+    
     const handleFocus = () => {
       fetchPalettes();
     };
 
+    window.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
     
     return () => {
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
   }, [fetchPalettes]);
+
+  // Force refetch when lastOperation changes
+  useEffect(() => {
+    if (lastOperation) {
+      fetchPalettes();
+    }
+  }, [lastOperation, fetchPalettes]);
 
   const handleDelete = async (id: number) => {
     try {
@@ -112,6 +131,13 @@ const Saved = () => {
       
       // Update the local state to reflect the deletion
       setPalettes(prevPalettes => prevPalettes.filter(palette => palette.id !== id));
+      
+      // Record the operation for forcing refetch
+      setLastOperation({
+        type: 'delete',
+        id: id,
+        timestamp: Date.now()
+      });
 
       toast({
         title: "Success",
@@ -154,6 +180,13 @@ const Saved = () => {
           palette.id === editingId ? { ...palette, name: editingName } : palette
         )
       );
+      
+      // Record the operation for forcing refetch
+      setLastOperation({
+        type: 'rename',
+        id: editingId,
+        timestamp: Date.now()
+      });
 
       setDialogOpen(false);
       setEditingId(null);
@@ -178,8 +211,17 @@ const Saved = () => {
   const handleEdit = async (colors: string[], id: number) => {
     try {
       console.log("Setting up for editing palette with ID:", id);
+      
+      // Store the palette data in localStorage for the editor page
       localStorage.setItem('editingPalette', JSON.stringify(colors));
       localStorage.setItem('editingPaletteId', id.toString());
+      
+      // Record the operation for forcing refetch when returning
+      setLastOperation({
+        type: 'edit',
+        id: id,
+        timestamp: Date.now()
+      });
       
       navigate('/');
     } catch (error) {
