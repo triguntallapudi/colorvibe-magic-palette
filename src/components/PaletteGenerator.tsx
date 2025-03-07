@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import ColorCard from './ColorCard';
@@ -22,8 +23,29 @@ const PaletteGenerator = () => {
   const [loading, setLoading] = useState(false);
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const navigate = useNavigate();
+  const generateButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    // Check if we're editing a palette, and handle it properly
+    const editingPaletteId = localStorage.getItem('editingPaletteId');
+    if (editingPaletteId) {
+      const editingPalette = localStorage.getItem('editingPalette');
+      if (editingPalette) {
+        setCurrentPalette(JSON.parse(editingPalette));
+      }
+    }
+  }, []);
 
   const handleGenerate = async () => {
+    if (!prompt.trim()) {
+      toast({
+        title: "Empty prompt",
+        description: "Please enter a prompt to generate colors",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLoading(true);
     try {
       const colors = await generateAIColors(prompt);
@@ -105,6 +127,13 @@ const PaletteGenerator = () => {
     }
   };
 
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && generateButtonRef.current) {
+      e.preventDefault();
+      generateButtonRef.current.click();
+    }
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto pt-24 space-y-12">
       <div className="text-center space-y-4">
@@ -122,12 +151,14 @@ const PaletteGenerator = () => {
             placeholder="Try keywords like 'sunset' or 'ocean'..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={handleInputKeyDown}
             className="flex-1"
           />
           <Button
             onClick={handleGenerate}
             className="bg-black text-white hover:bg-black/90"
             disabled={loading}
+            ref={generateButtonRef}
           >
             <Wand2 className="mr-2 h-4 w-4" />
             Generate

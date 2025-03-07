@@ -74,8 +74,8 @@ const Saved = () => {
 
       if (error) throw error;
 
-      // Refetch palettes after delete to ensure we have the latest data
-      await fetchPalettes();
+      // Update the local state to reflect the deletion
+      setPalettes(palettes.filter(palette => palette.id !== id));
 
       toast({
         title: "Success",
@@ -101,8 +101,10 @@ const Saved = () => {
 
       if (error) throw error;
 
-      // Refetch palettes after rename to ensure we have the latest data
-      await fetchPalettes();
+      // Update the local state to reflect the name change
+      setPalettes(palettes.map(palette => 
+        palette.id === editingId ? { ...palette, name: editingName } : palette
+      ));
 
       setDialogOpen(false);
       setEditingId(null);
@@ -145,7 +147,7 @@ const Saved = () => {
 
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {palettes.map((palette) => (
-          <div key={palette.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+          <div key={palette.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-300 hover:shadow-md transition-shadow hover:shadow-lg">
             <div className="relative group">
               <div className="flex h-48">
                 {palette.colors.map((color, index) => (

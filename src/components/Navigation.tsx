@@ -46,18 +46,18 @@ const Navigation = () => {
           <Link to="/" className="text-xl font-bold">
             ColorVibe
           </Link>
-          <div className="flex items-center gap-4 mr-6">
+          <div className="flex items-center gap-4 mr-8">
             {user ? (
               <>
                 <Link to="/saved">
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-800">
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-900 hover:text-white">
                     <BookmarkIcon className="h-5 w-5 mr-2" />
                     Saved Palettes
                   </Button>
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="text-white hover:bg-gray-800">
+                    <Button variant="ghost" size="sm" className="text-white hover:bg-gray-900 hover:text-white">
                       <UserRound className="h-5 w-5 mr-2" />
                       Profile
                       <ChevronDown className="h-4 w-4 ml-1" />
@@ -80,7 +80,7 @@ const Navigation = () => {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-white hover:bg-gray-800 transition-colors"
+                    className="text-white hover:bg-gray-900 hover:text-white transition-colors"
                   >
                     Log In
                   </Button>
@@ -88,7 +88,7 @@ const Navigation = () => {
                 <Link to="/signup">
                   <Button 
                     size="sm" 
-                    className="bg-white text-black hover:bg-gray-200 transition-colors"
+                    className="bg-white text-black hover:bg-gray-200 hover:text-black transition-colors"
                   >
                     Sign Up
                   </Button>
