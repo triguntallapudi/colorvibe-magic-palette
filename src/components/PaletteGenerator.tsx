@@ -22,13 +22,16 @@ const PaletteGenerator = () => {
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+  const [editingPaletteId, setEditingPaletteId] = useState<string | null>(null);
   const navigate = useNavigate();
   const generateButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     // Check if we're editing a palette, and handle it properly
-    const editingPaletteId = localStorage.getItem('editingPaletteId');
-    if (editingPaletteId) {
+    const storedEditingPaletteId = localStorage.getItem('editingPaletteId');
+    if (storedEditingPaletteId) {
+      setEditingPaletteId(storedEditingPaletteId);
+      
       const editingPalette = localStorage.getItem('editingPalette');
       if (editingPalette) {
         setCurrentPalette(JSON.parse(editingPalette));
@@ -76,17 +79,15 @@ const PaletteGenerator = () => {
         return;
       }
 
-      const editingId = localStorage.getItem('editingPaletteId');
-      
-      if (editingId) {
-        console.log("Updating palette with ID:", editingId);
+      if (editingPaletteId) {
+        console.log("Updating palette with ID:", editingPaletteId);
         const { error } = await supabase
           .from('palettes')
           .update({
             colors: currentPalette,
             name: prompt || 'Untitled Palette'
           })
-          .eq('id', editingId);
+          .eq('id', editingPaletteId);
 
         if (error) {
           console.error("Update error:", error);
@@ -103,6 +104,7 @@ const PaletteGenerator = () => {
         // Clear localStorage after successful save
         localStorage.removeItem('editingPalette');
         localStorage.removeItem('editingPaletteId');
+        setEditingPaletteId(null);
         
         navigate('/saved');
       } else {
@@ -169,7 +171,7 @@ const PaletteGenerator = () => {
           />
           <Button
             onClick={handleGenerate}
-            className="bg-black text-white hover:bg-black/90"
+            className="bg-black text-white hover:bg-black/90 hover:text-white"
             disabled={loading}
             ref={generateButtonRef}
           >
@@ -179,7 +181,7 @@ const PaletteGenerator = () => {
           <Button
             onClick={handleSave}
             variant="outline"
-            className="border-gray-200"
+            className="border-gray-200 hover:text-white"
           >
             <Save className="mr-2 h-4 w-4" />
             Save
