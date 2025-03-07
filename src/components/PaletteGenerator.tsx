@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,7 @@ import ColorCard from './ColorCard';
 import PaletteDialog from './PaletteDialog';
 import { Wand2, Save } from 'lucide-react';
 import { THEME_COLORS, generateAIColors } from '@/lib/colors';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 
@@ -65,6 +66,7 @@ const PaletteGenerator = () => {
 
   const handleSave = async () => {
     try {
+      setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -99,14 +101,16 @@ const PaletteGenerator = () => {
           description: "Palette updated successfully",
         });
 
+        // Important: Clear localStorage after successful update
         localStorage.removeItem('editingPalette');
         localStorage.removeItem('editingPaletteId');
         setEditingPaletteId(null);
         
+        // Navigate to saved page to see the updated palette
         navigate('/saved');
       } else {
         console.log("Creating new palette");
-        const { error } = await supabase
+        const { error, data } = await supabase
           .from('palettes')
           .insert([
             {
@@ -114,19 +118,23 @@ const PaletteGenerator = () => {
               colors: currentPalette,
               name: prompt || 'Untitled Palette',
             },
-          ]);
+          ])
+          .select();
 
         if (error) {
           console.error("Insert error:", error);
           throw error;
         }
 
-        console.log("New palette saved successfully");
+        console.log("New palette saved successfully", data);
 
         toast({
           title: "Success!",
           description: "Palette saved successfully",
         });
+        
+        // Navigate to saved page to see the new palette
+        navigate('/saved');
       }
     } catch (error: any) {
       console.error('Save error:', error);
@@ -136,6 +144,8 @@ const PaletteGenerator = () => {
         variant: "destructive",
         className: "w-auto h-auto p-4"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -179,6 +189,7 @@ const PaletteGenerator = () => {
             onClick={handleSave}
             variant="outline"
             className="border-gray-200 hover:text-white"
+            disabled={loading}
           >
             <Save className="mr-2 h-4 w-4" />
             Save

@@ -1,7 +1,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trash2, Edit2, Pencil } from 'lucide-react';
@@ -32,11 +32,12 @@ const Saved = () => {
   const saveButtonRef = useRef<HTMLButtonElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastOperation, setLastOperation] = useState<{type: string, id?: number, timestamp: number} | null>(null);
+  const isInitialMount = useRef(true);
 
   // Enhanced fetchPalettes function that uses supabase directly each time
   const fetchPalettes = useCallback(async () => {
-    setIsLoading(true);
     console.log("Fetching palettes...");
+    setIsLoading(true);
     
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -81,11 +82,11 @@ const Saved = () => {
     }
   }, [navigate]);
 
-  // Initial load and setup listeners
+  // Force a refetch on initial mount and whenever the component gains focus or visibility
   useEffect(() => {
     fetchPalettes();
     
-    // Set up listeners for page visibility and focus to ensure data is fresh
+    // Set up listeners for page visibility and focus
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         fetchPalettes();
@@ -96,6 +97,7 @@ const Saved = () => {
       fetchPalettes();
     };
 
+    // These event listeners ensure data is refreshed when returning to the page
     window.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
     
@@ -105,11 +107,12 @@ const Saved = () => {
     };
   }, [fetchPalettes]);
 
-  // Force refetch when lastOperation changes
+  // This ensures palettes are refetched after operations
   useEffect(() => {
-    if (lastOperation) {
+    if (lastOperation && !isInitialMount.current) {
       fetchPalettes();
     }
+    isInitialMount.current = false;
   }, [lastOperation, fetchPalettes]);
 
   const handleDelete = async (id: number) => {
@@ -129,7 +132,7 @@ const Saved = () => {
 
       console.log("Palette deleted successfully");
       
-      // Update the local state to reflect the deletion
+      // Update the local state to reflect the deletion immediately
       setPalettes(prevPalettes => prevPalettes.filter(palette => palette.id !== id));
       
       // Record the operation for forcing refetch
@@ -143,6 +146,9 @@ const Saved = () => {
         title: "Success",
         description: "Palette deleted successfully",
       });
+      
+      // Force a refetch to ensure data consistency
+      await fetchPalettes();
     } catch (error) {
       console.error("Delete error:", error);
       toast({
@@ -196,6 +202,9 @@ const Saved = () => {
         title: "Success",
         description: "Palette renamed successfully",
       });
+      
+      // Force a refetch to ensure data consistency
+      await fetchPalettes();
     } catch (error) {
       console.error("Rename error:", error);
       toast({

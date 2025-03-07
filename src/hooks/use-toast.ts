@@ -64,7 +64,7 @@ const reducer = (state: State, action: Action): State => {
         ...state,
         toasts: [
           {
-            ...action.toast,
+            ...(action.toast as ToasterToast),
             id: genId(),
           },
           ...state.toasts,
@@ -147,7 +147,6 @@ function toast({ ...props }: Toast) {
     type: actionTypes.ADD_TOAST,
     toast: {
       ...props,
-      id,
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()
