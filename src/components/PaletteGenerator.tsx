@@ -79,6 +79,7 @@ const PaletteGenerator = () => {
       const editingId = localStorage.getItem('editingPaletteId');
       
       if (editingId) {
+        console.log("Updating palette with ID:", editingId);
         const { error } = await supabase
           .from('palettes')
           .update({
@@ -87,18 +88,25 @@ const PaletteGenerator = () => {
           })
           .eq('id', editingId);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Update error:", error);
+          throw error;
+        }
+
+        console.log("Palette updated successfully");
 
         toast({
           title: "Success!",
           description: "Palette updated successfully",
         });
 
+        // Clear localStorage after successful save
         localStorage.removeItem('editingPalette');
         localStorage.removeItem('editingPaletteId');
         
         navigate('/saved');
       } else {
+        console.log("Creating new palette");
         const { error } = await supabase
           .from('palettes')
           .insert([
@@ -109,7 +117,12 @@ const PaletteGenerator = () => {
             },
           ]);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Insert error:", error);
+          throw error;
+        }
+
+        console.log("New palette saved successfully");
 
         toast({
           title: "Success!",

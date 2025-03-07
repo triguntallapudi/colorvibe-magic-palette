@@ -36,6 +36,7 @@ const Saved = () => {
   }, []);
 
   const fetchPalettes = async () => {
+    console.log("Fetching palettes...");
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       toast({
@@ -62,26 +63,37 @@ const Saved = () => {
       return;
     }
 
+    console.log("Fetched palettes:", data);
     setPalettes(data || []);
   };
 
   const handleDelete = async (id: number) => {
     try {
+      console.log("Deleting palette with ID:", id);
       const { error } = await supabase
         .from('palettes')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Delete error:", error);
+        throw error;
+      }
 
+      console.log("Palette deleted successfully");
+      
       // Update the local state to reflect the deletion
       setPalettes(palettes.filter(palette => palette.id !== id));
+
+      // Refetch to ensure we have the latest data
+      await fetchPalettes();
 
       toast({
         title: "Success",
         description: "Palette deleted successfully",
       });
     } catch (error) {
+      console.error("Delete error:", error);
       toast({
         title: "Error",
         description: "Failed to delete palette",
@@ -94,17 +106,26 @@ const Saved = () => {
     if (!editingId) return;
 
     try {
+      console.log("Renaming palette with ID:", editingId, "to:", editingName);
       const { error } = await supabase
         .from('palettes')
         .update({ name: editingName })
         .eq('id', editingId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Rename error:", error);
+        throw error;
+      }
 
+      console.log("Palette renamed successfully");
+      
       // Update the local state to reflect the name change
       setPalettes(palettes.map(palette => 
         palette.id === editingId ? { ...palette, name: editingName } : palette
       ));
+
+      // Refetch to ensure we have the latest data
+      await fetchPalettes();
 
       setDialogOpen(false);
       setEditingId(null);
@@ -115,6 +136,7 @@ const Saved = () => {
         description: "Palette renamed successfully",
       });
     } catch (error) {
+      console.error("Rename error:", error);
       toast({
         title: "Error",
         description: "Failed to rename palette",
@@ -123,10 +145,30 @@ const Saved = () => {
     }
   };
 
-  const handleEdit = (colors: string[], id: number) => {
-    localStorage.setItem('editingPalette', JSON.stringify(colors));
-    localStorage.setItem('editingPaletteId', id.toString());
-    navigate('/');
+  const handleEdit = async (colors: string[], id: number) => {
+    try {
+      console.log("Setting up for editing palette with ID:", id);
+      localStorage.setItem('editingPalette', JSON.stringify(colors));
+      localStorage.setItem('editingPaletteId', id.toString());
+      
+      // Clear any stale data in localStorage when returning to this page
+      const handleBeforeUnload = () => {
+        // We won't actually clear here, just adding this for future reference
+        // This event would normally be used to detect page refresh, but we don't want
+        // to clear on navigation between pages
+      };
+      
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      
+      navigate('/');
+    } catch (error) {
+      console.error("Edit setup error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to set up palette editing",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
