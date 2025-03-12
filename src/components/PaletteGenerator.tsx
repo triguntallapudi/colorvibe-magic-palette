@@ -209,13 +209,11 @@ const PaletteGenerator = () => {
           </Button>
           <Button
             onClick={handleRandomGenerate}
-            variant="outline"
-            className="border-gray-200 hover:text-white"
+            className="bg-black text-white hover:bg-black/90 hover:text-white"
             disabled={loading}
             title="Generate Random Palette"
           >
-            <Shuffle className="mr-2 h-4 w-4" />
-            Random
+            <Shuffle className="h-4 w-4" />
           </Button>
           <Button
             onClick={handleSave}
