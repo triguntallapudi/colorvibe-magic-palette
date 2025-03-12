@@ -31,7 +31,6 @@ const Saved = () => {
   const navigate = useNavigate();
   const saveButtonRef = useRef<HTMLButtonElement>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [lastOperation, setLastOperation] = useState<{type: string, id?: number, timestamp: number} | null>(null);
   const isInitialMount = useRef(true);
 
   // Enhanced fetchPalettes function that uses supabase directly each time
@@ -82,6 +81,41 @@ const Saved = () => {
     }
   }, [navigate]);
 
+  // Clear all palettes (only for development)
+  const clearAllPalettes = async () => {
+    try {
+      setIsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { error } = await supabase
+        .from('palettes')
+        .delete()
+        .eq('user_id', user.id);
+        
+      if (error) {
+        console.error("Delete all error:", error);
+        throw error;
+      }
+      
+      toast({
+        title: "Success",
+        description: "All palettes deleted successfully",
+      });
+      
+      setPalettes([]);
+    } catch (error) {
+      console.error("Clear all error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete all palettes",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Force a refetch on initial mount and whenever the component gains focus or visibility
   useEffect(() => {
     fetchPalettes();
@@ -89,11 +123,13 @@ const Saved = () => {
     // Set up listeners for page visibility and focus
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
+        console.log("Page became visible, fetching fresh data");
         fetchPalettes();
       }
     };
     
     const handleFocus = () => {
+      console.log("Window focused, fetching fresh data");
       fetchPalettes();
     };
 
@@ -106,14 +142,6 @@ const Saved = () => {
       window.removeEventListener('focus', handleFocus);
     };
   }, [fetchPalettes]);
-
-  // This ensures palettes are refetched after operations
-  useEffect(() => {
-    if (lastOperation && !isInitialMount.current) {
-      fetchPalettes();
-    }
-    isInitialMount.current = false;
-  }, [lastOperation, fetchPalettes]);
 
   const handleDelete = async (id: number) => {
     try {
@@ -135,20 +163,10 @@ const Saved = () => {
       // Update the local state to reflect the deletion immediately
       setPalettes(prevPalettes => prevPalettes.filter(palette => palette.id !== id));
       
-      // Record the operation for forcing refetch
-      setLastOperation({
-        type: 'delete',
-        id: id,
-        timestamp: Date.now()
-      });
-
       toast({
         title: "Success",
         description: "Palette deleted successfully",
       });
-      
-      // Force a refetch to ensure data consistency
-      await fetchPalettes();
     } catch (error) {
       console.error("Delete error:", error);
       toast({
@@ -187,13 +205,6 @@ const Saved = () => {
         )
       );
       
-      // Record the operation for forcing refetch
-      setLastOperation({
-        type: 'rename',
-        id: editingId,
-        timestamp: Date.now()
-      });
-
       setDialogOpen(false);
       setEditingId(null);
       setEditingName('');
@@ -203,7 +214,7 @@ const Saved = () => {
         description: "Palette renamed successfully",
       });
       
-      // Force a refetch to ensure data consistency
+      // Re-fetch to ensure data consistency
       await fetchPalettes();
     } catch (error) {
       console.error("Rename error:", error);
@@ -225,13 +236,6 @@ const Saved = () => {
       localStorage.setItem('editingPalette', JSON.stringify(colors));
       localStorage.setItem('editingPaletteId', id.toString());
       
-      // Record the operation for forcing refetch when returning
-      setLastOperation({
-        type: 'edit',
-        id: id,
-        timestamp: Date.now()
-      });
-      
       navigate('/');
     } catch (error) {
       console.error("Edit setup error:", error);
@@ -252,11 +256,25 @@ const Saved = () => {
 
   return (
     <div className="container mx-auto pt-24 pb-16 px-4">
-      <div className="flex items-center gap-4 mb-12">
-        <Link to="/" className="text-gray-600 hover:text-gray-900">
-          <ArrowLeft className="h-6 w-6" />
-        </Link>
-        <h1 className="text-3xl font-bold">Saved Palettes</h1>
+      <div className="flex items-center justify-between gap-4 mb-12">
+        <div className="flex items-center gap-4">
+          <Link to="/" className="text-gray-600 hover:text-gray-900">
+            <ArrowLeft className="h-6 w-6" />
+          </Link>
+          <h1 className="text-3xl font-bold">Saved Palettes</h1>
+        </div>
+        
+        {/* Clear all palettes button (development only) */}
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={clearAllPalettes} 
+          className="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-red-200"
+          disabled={isLoading}
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Clear All
+        </Button>
       </div>
 
       {isLoading ? (
