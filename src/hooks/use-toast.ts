@@ -60,6 +60,7 @@ const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case actionTypes.ADD_TOAST:
+      // Only allow one toast at a time
       return {
         ...state,
         toasts: [
@@ -68,7 +69,7 @@ const reducer = (state: State, action: Action): State => {
             id: genId(),
             open: true,
           },
-        ].slice(0, TOAST_LIMIT),
+        ],
       }
 
     case actionTypes.UPDATE_TOAST:
@@ -174,7 +175,7 @@ function toast({ ...props }: Toast) {
     },
   })
 
-  // Auto-dismiss after a delay
+  // Auto-dismiss after 3 seconds
   setTimeout(() => {
     dismiss()
   }, 3000)
