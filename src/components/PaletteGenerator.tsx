@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -70,8 +71,17 @@ const PaletteGenerator = () => {
       console.log("Generated random palette:", randomColors);
       setCurrentPalette(randomColors);
       
-      // Set prompt to empty to avoid confusion with randomly generated palettes
-      setPrompt('');
+      // Set prompt to match the theme if possible
+      const matchingTheme = Object.entries(THEME_COLORS).find(
+        ([_, colors]) => JSON.stringify(colors) === JSON.stringify(randomColors)
+      );
+      
+      if (matchingTheme) {
+        console.log("Found matching theme:", matchingTheme[0]);
+        setPrompt(matchingTheme[0]);
+      } else {
+        console.log("No matching theme found");
+      }
     } catch (error) {
       console.error("Random generation error:", error);
       toast({
