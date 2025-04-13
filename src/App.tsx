@@ -9,14 +9,20 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Saved from "./pages/Saved";
 import NotFound from "./pages/NotFound";
+import React from "react";
 
 const queryClient = new QueryClient();
+
+// Wrapper component for TooltipProvider to ensure proper context
+const TooltipWrapper = ({ children }: { children: React.ReactNode }) => {
+  return <TooltipProvider>{children}</TooltipProvider>;
+};
 
 const App = () => {
   console.log("Rendering App component"); // Debug log
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
+      <TooltipWrapper>
         <BrowserRouter>
           <Navigation />
           <main>
@@ -30,7 +36,7 @@ const App = () => {
           </main>
           <Toaster />
         </BrowserRouter>
-      </TooltipProvider>
+      </TooltipWrapper>
     </QueryClientProvider>
   );
 };

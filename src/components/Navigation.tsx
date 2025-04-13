@@ -87,9 +87,9 @@ const Navigation = () => {
                 <Link to="/signup">
                   <Button 
                     size="sm"
-                    className="bg-white text-black h-9 px-4 hover:bg-gray-200 hover:text-black"
+                    className="bg-white text-black h-9 px-4 hover:bg-gray-200 text-white hover:text-white"
                   >
-                    <span className="flex items-center justify-center">Sign Up</span>
+                    <span className="flex items-center justify-center text-white">Sign Up</span>
                   </Button>
                 </Link>
               </>

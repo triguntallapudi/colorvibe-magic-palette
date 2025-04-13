@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -70,8 +71,9 @@ const PaletteGenerator = () => {
       console.log("Generated random palette:", randomColors);
       setCurrentPalette(randomColors);
       
-      // Set prompt to empty to avoid confusion with randomly generated palettes
-      setPrompt('');
+      // Set a default prompt for randomly generated palettes
+      setPrompt("Random Palette");
+      
     } catch (error) {
       console.error("Random generation error:", error);
       toast({
