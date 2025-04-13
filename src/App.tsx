@@ -7,7 +7,6 @@ import Navigation from "./components/Navigation";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Saved from "./pages/Saved";
 import NotFound from "./pages/NotFound";
 
 // Create a wrapper component for TooltipProvider to ensure React hooks are used correctly
@@ -29,7 +28,6 @@ const App = () => {
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route path="/saved" element={<Saved />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

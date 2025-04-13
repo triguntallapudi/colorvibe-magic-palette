@@ -1,42 +1,20 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import ColorCard from './ColorCard';
 import PaletteDialog from './PaletteDialog';
-import { Wand2, Save, Shuffle } from 'lucide-react';
+import { Wand2, Shuffle } from 'lucide-react';
 import { THEME_COLORS, generateAIColors, getRandomPalette } from '@/lib/colors';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase';
-import { useNavigate } from 'react-router-dom';
 
 const PaletteGenerator = () => {
-  const [currentPalette, setCurrentPalette] = useState<string[]>(() => {
-    const editingPalette = localStorage.getItem('editingPalette');
-    if (editingPalette) {
-      return JSON.parse(editingPalette);
-    }
-    return THEME_COLORS.default;
-  });
+  const [currentPalette, setCurrentPalette] = useState<string[]>(THEME_COLORS.default);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
-  const [editingPaletteId, setEditingPaletteId] = useState<string | null>(null);
-  const navigate = useNavigate();
   const generateButtonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    const storedEditingPaletteId = localStorage.getItem('editingPaletteId');
-    if (storedEditingPaletteId) {
-      setEditingPaletteId(storedEditingPaletteId);
-      
-      const editingPalette = localStorage.getItem('editingPalette');
-      if (editingPalette) {
-        setCurrentPalette(JSON.parse(editingPalette));
-      }
-    }
-  }, []);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -71,19 +49,19 @@ const PaletteGenerator = () => {
       console.log("Generated random palette:", randomColors);
       setCurrentPalette(randomColors);
       
-      // Set prompt to match the theme if possible
+      // Set prompt to match the theme name precisely
       const matchingTheme = Object.entries(THEME_COLORS).find(
         ([_, colors]) => JSON.stringify(colors) === JSON.stringify(randomColors)
       );
       
       if (matchingTheme) {
         console.log("Found matching theme:", matchingTheme[0]);
-        // Update the prompt field with the theme name and capitalize first letter
+        // Update the prompt field with the exact theme name, capitalizing first letter
         const themeName = matchingTheme[0].charAt(0).toUpperCase() + matchingTheme[0].slice(1);
         setPrompt(themeName);
       } else {
-        console.log("No matching theme found");
-        setPrompt("Random Palette");
+        // If no matching theme is found (which shouldn't happen with getRandomPalette)
+        setPrompt("");
       }
     } catch (error) {
       console.error("Random generation error:", error);
@@ -94,88 +72,6 @@ const PaletteGenerator = () => {
       });
     }
     setLoading(false);
-  };
-
-  const handleSave = async () => {
-    try {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({
-          title: "Login Required",
-          description: "You need to be logged in to save palettes",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (editingPaletteId) {
-        console.log("Updating palette with ID:", editingPaletteId);
-        const { error } = await supabase
-          .from('palettes')
-          .update({
-            colors: currentPalette,
-            name: prompt || 'Untitled Palette'
-          })
-          .eq('id', editingPaletteId);
-
-        if (error) {
-          console.error("Update error:", error);
-          throw error;
-        }
-
-        console.log("Palette updated successfully");
-
-        toast({
-          title: "Success!",
-          description: "Palette updated successfully",
-        });
-
-        // Clear localStorage after successful update
-        localStorage.removeItem('editingPalette');
-        localStorage.removeItem('editingPaletteId');
-        setEditingPaletteId(null);
-        
-        // Navigate to saved page to see the updated palette
-        navigate('/saved');
-      } else {
-        console.log("Creating new palette");
-        const { error } = await supabase
-          .from('palettes')
-          .insert([
-            {
-              user_id: user.id,
-              colors: currentPalette,
-              name: prompt || 'Untitled Palette',
-            },
-          ]);
-
-        if (error) {
-          console.error("Insert error:", error);
-          throw error;
-        }
-
-        console.log("New palette saved successfully");
-
-        toast({
-          title: "Success!",
-          description: "Palette saved successfully",
-        });
-        
-        // Navigate to saved page to see the new palette
-        navigate('/saved');
-      }
-    } catch (error: any) {
-      console.error('Save error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save palette. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -222,15 +118,6 @@ const PaletteGenerator = () => {
           >
             <Shuffle className="h-4 w-4" />
           </Button>
-          <Button
-            onClick={handleSave}
-            variant="outline"
-            className="border-gray-200 text-black hover:text-black"
-            disabled={loading}
-          >
-            <Save className="mr-2 h-4 w-4" />
-            Save
-          </Button>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -266,7 +153,6 @@ const PaletteGenerator = () => {
               <li>2. Click Generate to create a unique color palette</li>
               <li>3. Click Random to get a surprise palette</li>
               <li>4. Click on any color to edit it manually</li>
-              <li>5. Save your favorite palettes for future reference</li>
             </ul>
           </div>
         </div>
