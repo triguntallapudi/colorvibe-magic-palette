@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
@@ -30,8 +31,8 @@ const Saved = () => {
   const navigate = useNavigate();
   const saveButtonRef = useRef<HTMLButtonElement>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [initialLoad, setInitialLoad] = useState(true);
 
+  // Enhanced fetchPalettes function that uses supabase directly each time
   const fetchPalettes = useCallback(async () => {
     console.log("Fetching palettes...");
     setIsLoading(true);
@@ -47,6 +48,19 @@ const Saved = () => {
         return;
       }
 
+      // Clear all palettes from the database when the component first loads
+      const { error: clearError } = await supabase
+        .from('palettes')
+        .delete()
+        .eq('user_id', user.id);
+        
+      if (clearError) {
+        console.error("Clear error:", clearError);
+      } else {
+        console.log("All palettes have been cleared");
+      }
+      
+      // Get fresh data directly from Supabase
       const { data, error } = await supabase
         .from('palettes')
         .select('*')
@@ -64,14 +78,6 @@ const Saved = () => {
 
       console.log("Fetched palettes:", data);
       setPalettes(data || []);
-      
-      if (initialLoad && data && data.length > 0) {
-        console.log("Clearing all palettes on initial load");
-        setTimeout(() => {
-          clearAllPalettes();
-        }, 500);
-        setInitialLoad(false);
-      }
     } catch (error) {
       console.error("Fetch error:", error);
       toast({
@@ -81,30 +87,11 @@ const Saved = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [navigate, initialLoad]);
+  }, [navigate]);
 
+  // Force a refetch on initial mount only
   useEffect(() => {
     fetchPalettes();
-    
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        console.log("Page became visible, fetching fresh data");
-        fetchPalettes();
-      }
-    };
-    
-    const handleFocus = () => {
-      console.log("Window focused, fetching fresh data");
-      fetchPalettes();
-    };
-
-    window.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-    
-    return () => {
-      window.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
-    };
   }, [fetchPalettes]);
 
   const handleDelete = async (id: number) => {
@@ -124,6 +111,7 @@ const Saved = () => {
 
       console.log("Palette deleted successfully");
       
+      // Update the local state to reflect the deletion immediately
       setPalettes(prevPalettes => prevPalettes.filter(palette => palette.id !== id));
       
       toast({
@@ -193,6 +181,7 @@ const Saved = () => {
 
       console.log("Palette renamed successfully");
       
+      // Update the local state to reflect the name change
       setPalettes(prevPalettes => 
         prevPalettes.map(palette => 
           palette.id === editingId ? { ...palette, name: editingName } : palette
@@ -222,9 +211,11 @@ const Saved = () => {
     try {
       console.log("Setting up for editing palette with ID:", id);
       
+      // Store the palette data in localStorage for the editor page
       localStorage.setItem('editingPalette', JSON.stringify(colors));
       localStorage.setItem('editingPaletteId', id.toString());
       
+      // Clear any previous editing state to ensure we're starting fresh
       localStorage.removeItem('savedColors');
       localStorage.removeItem('currentKeyword');
       
@@ -248,7 +239,7 @@ const Saved = () => {
   return (
     <div className="container mx-auto pt-24 pb-16 px-4">
       <div className="flex items-center mb-8">
-        <Link to="/" className="bg-black text-white hover:bg-[#333333] rounded-md p-2 flex items-center justify-center transition-colors mr-3 self-center">
+        <Link to="/" className="bg-black text-white hover:bg-[#333333] rounded-md p-2 flex items-center justify-center transition-colors mr-3 self-start">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h1 className="text-3xl font-bold">Saved Palettes</h1>
