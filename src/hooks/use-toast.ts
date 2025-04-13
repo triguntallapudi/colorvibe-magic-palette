@@ -1,5 +1,4 @@
 
-import * as React from "react"
 import { type ToastProps } from "@/components/ui/toast"
 
 type ToasterToast = ToastProps & {
@@ -15,6 +14,8 @@ const TOAST_REMOVE_DELAY = 3000
 type ToasterToastState = {
   toasts: ToasterToast[]
 }
+
+import * as React from "react"
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -59,6 +60,7 @@ const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case actionTypes.ADD_TOAST:
+      // Only allow one toast at a time
       return {
         ...state,
         toasts: [
@@ -173,10 +175,10 @@ function toast({ ...props }: Toast) {
     },
   })
 
-  // Auto-dismiss after 3 seconds
+  // Auto-dismiss after 5 seconds
   setTimeout(() => {
     dismiss()
-  }, 3000)
+  }, 5000)
 
   return {
     id,
