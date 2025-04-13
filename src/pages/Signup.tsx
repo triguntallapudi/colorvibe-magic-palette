@@ -159,7 +159,7 @@ const Signup = () => {
             ref={submitButtonRef}
             disabled={password && confirmPassword ? !passwordMatch : false}
           >
-            Create account
+            Sign up
           </Button>
 
           <p className="text-center text-sm text-gray-600">

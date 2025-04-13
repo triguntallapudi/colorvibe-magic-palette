@@ -2,49 +2,21 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "react-router-dom";
-import { UserRound, BookmarkIcon, ChevronDown, Sun, Moon, ChevronLeft } from "lucide-react";
+import { UserRound, BookmarkIcon, ChevronDown, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const Navigation = () => {
   const { data: { user }, signOut } = useAuth();
   const location = useLocation();
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [mounted, setMounted] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
   };
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    
-    localStorage.setItem('theme', newTheme);
-  };
-
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
     setMounted(true);
-    
-    // Check for saved theme preference, default to light
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    
-    if (savedTheme === 'dark') {
-      setTheme('dark');
-      document.documentElement.classList.add('dark');
-    } else {
-      // Default to light mode
-      setTheme('light');
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
   }, []);
 
   if (!mounted) {
@@ -74,15 +46,6 @@ const Navigation = () => {
             ColorVibe
           </Link>
           <div className="flex items-center gap-4 mr-8">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={toggleTheme}
-              className="text-white hover:bg-gray-700 hover:text-white"
-            >
-              {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-            </Button>
-            
             {user ? (
               <>
                 <Link to="/saved">
@@ -104,9 +67,6 @@ const Navigation = () => {
                       <div className="text-sm font-normal text-gray-400">{user.email}</div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-gray-700" />
-                    <DropdownMenuItem onClick={toggleTheme} className="hover:bg-gray-700 text-white cursor-pointer">
-                      {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleSignOut} className="hover:bg-gray-700 text-white cursor-pointer">
                       Sign out
                     </DropdownMenuItem>
