@@ -78,9 +78,12 @@ const PaletteGenerator = () => {
       
       if (matchingTheme) {
         console.log("Found matching theme:", matchingTheme[0]);
-        setPrompt(matchingTheme[0]);
+        // Update the prompt field with the theme name and capitalize first letter
+        const themeName = matchingTheme[0].charAt(0).toUpperCase() + matchingTheme[0].slice(1);
+        setPrompt(themeName);
       } else {
         console.log("No matching theme found");
+        setPrompt("Random Palette");
       }
     } catch (error) {
       console.error("Random generation error:", error);

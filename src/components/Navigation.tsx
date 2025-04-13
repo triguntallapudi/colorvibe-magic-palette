@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "react-router-dom";
-import { UserRound, BookmarkIcon, ChevronDown, ArrowLeft } from "lucide-react";
+import { UserRound, BookmarkIcon, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -81,7 +81,7 @@ const Navigation = () => {
                     size="sm"
                     className="text-white h-9 px-4 hover:bg-gray-700 hover:text-white"
                   >
-                    <span className="flex items-center justify-center">Log In</span>
+                    <span className="flex items-center justify-center text-white">Log In</span>
                   </Button>
                 </Link>
                 <Link to="/signup">

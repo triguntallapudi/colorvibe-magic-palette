@@ -155,7 +155,7 @@ const Signup = () => {
 
           <Button 
             type="submit" 
-            className="w-full bg-black text-white hover:bg-[#333333]"
+            className="w-full bg-black text-white hover:bg-[#333333] hover:text-white"
             ref={submitButtonRef}
             disabled={password && confirmPassword ? !passwordMatch : false}
           >

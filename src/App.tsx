@@ -10,13 +10,18 @@ import Signup from "./pages/Signup";
 import Saved from "./pages/Saved";
 import NotFound from "./pages/NotFound";
 
+// Create a wrapper component for TooltipProvider to ensure React hooks are used correctly
+const TooltipWrapper = ({ children }: { children: React.ReactNode }) => {
+  return <TooltipProvider>{children}</TooltipProvider>;
+};
+
 const queryClient = new QueryClient();
 
 const App = () => {
   console.log("Rendering App component"); // Debug log
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
+      <TooltipWrapper>
         <BrowserRouter>
           <Navigation />
           <main>
@@ -30,7 +35,7 @@ const App = () => {
           </main>
           <Toaster />
         </BrowserRouter>
-      </TooltipProvider>
+      </TooltipWrapper>
     </QueryClientProvider>
   );
 };

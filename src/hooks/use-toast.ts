@@ -175,10 +175,10 @@ function toast({ ...props }: Toast) {
     },
   })
 
-  // Auto-dismiss after 3 seconds
+  // Auto-dismiss after 5 seconds
   setTimeout(() => {
     dismiss()
-  }, 3000)
+  }, 5000)
 
   return {
     id,
