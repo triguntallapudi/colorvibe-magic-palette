@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "react-router-dom";
-import { UserRound, ChevronDown } from "lucide-react";
+import { UserRound, BookmarkIcon, ChevronDown, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -48,6 +48,12 @@ const Navigation = () => {
           <div className="flex items-center gap-4 mr-8">
             {user ? (
               <>
+                <Link to="/saved">
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700 hover:text-white">
+                    <BookmarkIcon className="h-5 w-5 mr-2" />
+                    Saved Palettes
+                  </Button>
+                </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700 hover:text-white">
@@ -73,7 +79,7 @@ const Navigation = () => {
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    className="text-white h-9 px-4 hover:bg-gray-700"
+                    className="text-white h-9 px-4 hover:bg-gray-700 hover:text-white"
                   >
                     <span className="flex items-center justify-center text-white">Log In</span>
                   </Button>
@@ -81,9 +87,9 @@ const Navigation = () => {
                 <Link to="/signup">
                   <Button 
                     size="sm"
-                    className="bg-white text-black h-9 px-4 hover:bg-gray-200 hover:text-black"
+                    className="bg-white text-black h-9 px-4 hover:bg-gray-200 text-white hover:text-white"
                   >
-                    <span className="flex items-center justify-center text-black">Sign Up</span>
+                    <span className="flex items-center justify-center text-white">Sign Up</span>
                   </Button>
                 </Link>
               </>
