@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { ColorCard } from '@/components/ColorCard';
+import ColorCard from '@/components/ColorCard';
 import { toast } from '@/components/ui/use-toast';
 import { Card } from '@/components/ui/card';
 
@@ -52,7 +52,16 @@ const Browse = () => {
         {palettes.map((palette) => (
           <Card key={palette.id} className="p-4 shadow-lg">
             <h3 className="text-lg font-medium mb-2">{palette.name}</h3>
-            <ColorCard colors={palette.colors} />
+            <div className="grid grid-cols-5 gap-2">
+              {palette.colors.map((color, i) => (
+                <ColorCard 
+                  key={i} 
+                  color={color} 
+                  index={i} 
+                  showHex={false}
+                />
+              ))}
+            </div>
           </Card>
         ))}
       </div>
