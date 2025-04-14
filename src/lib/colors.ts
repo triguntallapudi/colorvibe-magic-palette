@@ -1,4 +1,3 @@
-
 export const colorKeywords = {
   "vibrant": ["#FF5252", "#FF4081", "#E040FB", "#7C4DFF", "#536DFE"],
   "pastel": ["#FFD3E0", "#D3F8FF", "#FFF3CD", "#DCEDC8", "#F8BBD0"],
@@ -116,7 +115,6 @@ export const colorKeywords = {
   "berry": ["#880E4F", "#AD1457", "#C2185B", "#D81B60", "#E91E63"],
   "ivory": ["#FFFDE7", "#FFF9C4", "#FFF59D", "#FFF176", "#FFEE58"],
   "teal": ["#00BCD4", "#00ACC1", "#0097A7", "#00838F", "#006064"],
-  // Adding more keyword colors
   "aqua": ["#00FFFF", "#7FFFD4", "#40E0D0", "#48D1CC", "#00CED1"],
   "magenta": ["#FF00FF", "#FF66FF", "#FF33FF", "#CC00CC", "#990099"],
   "scarlet": ["#FF2400", "#F21C0C", "#DC143C", "#ED2939", "#FD0E35"],
@@ -161,7 +159,6 @@ export const getRandomKeyword = (): string => {
   return keywords[randomIndex];
 };
 
-// Adding the missing exports
 export const THEME_COLORS = {
   default: ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEEAD"],
   dark: ["#212121", "#424242", "#616161", "#757575", "#9E9E9E"],
@@ -177,9 +174,7 @@ export const THEME_COLORS = {
   minimal: ["#F5F5F5", "#EEEEEE", "#E0E0E0", "#BDBDBD", "#9E9E9E"],
 };
 
-// Generate palettes based on AI prompt
 export const generateAIColors = async (prompt: string): Promise<string[]> => {
-  // First check if prompt matches any color keyword
   const lowercasePrompt = prompt.toLowerCase();
   
   for (const [keyword, colors] of Object.entries(colorKeywords)) {
@@ -188,18 +183,15 @@ export const generateAIColors = async (prompt: string): Promise<string[]> => {
     }
   }
   
-  // If no keyword match, search for THEME_COLORS match
   for (const [theme, colors] of Object.entries(THEME_COLORS)) {
     if (lowercasePrompt.includes(theme.toLowerCase())) {
       return colors;
     }
   }
   
-  // If no matches at all, return a random palette from colorKeywords
   return getRandomPalette();
 };
 
-// Get a random palette
 export const getRandomPalette = (): string[] => {
   const randomKeyword = getRandomKeyword();
   return colorKeywords[randomKeyword];
