@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
-import { toast } from "@/components/ui/use-toast";
 import { useRef, useState } from "react";
 
 const Signup = () => {
@@ -18,31 +17,14 @@ const Signup = () => {
     const formData = new FormData(e.target as HTMLFormElement);
     const email = formData.get('email') as string;
 
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (password.length < 6) {
-      toast({
-        title: "Invalid password",
-        description: "Password must be at least 6 characters long",
-        variant: "destructive",
-      });
+      console.error("Password must be at least 6 characters long");
       return;
     }
 
     if (password !== confirmPassword) {
       setPasswordMatch(false);
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match",
-        variant: "destructive",
-      });
+      console.error("Passwords don't match");
       return;
     }
 
@@ -53,25 +35,14 @@ const Signup = () => {
       });
 
       if (error) throw error;
-
-      toast({
-        title: "Welcome!",
-        description: "Account created successfully. Please check your email for verification.",
-      });
-      
       navigate('/login');
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create account",
-        variant: "destructive",
-      });
+      console.error(error.message);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && submitButtonRef.current) {
-      // Don't trigger submit if the event is from an input field
       if (e.target instanceof HTMLInputElement) {
         return;
       }
@@ -155,11 +126,11 @@ const Signup = () => {
 
           <Button 
             type="submit" 
-            className="w-full bg-black text-white hover:bg-[#333333]"
+            className="w-full bg-black text-white hover:bg-gray-800 transition-colors"
             ref={submitButtonRef}
             disabled={password && confirmPassword ? !passwordMatch : false}
           >
-            Create account
+            Sign up
           </Button>
 
           <p className="text-center text-sm text-gray-600">

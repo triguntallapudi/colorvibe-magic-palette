@@ -96,37 +96,12 @@ const Navigation = () => {
                   <DropdownMenuItem onClick={toggleTheme} className="hover:bg-gray-700 text-white cursor-pointer">
                     {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-gray-700 text-white cursor-pointer" asChild>
-                    <Link to="/browse">Browse Palettes</Link>
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut} className="hover:bg-gray-700 text-white cursor-pointer">
                     Sign out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : (
-              <>
-                <Link to="/login">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    className="text-white hover:bg-gray-700 hover:text-white"
-                  >
-                    <LogIn className="h-5 w-5 mr-2" />
-                    <span className="text-white">Log In</span>
-                  </Button>
-                </Link>
-                <Link to="/signup">
-                  <Button 
-                    size="sm"
-                    className="bg-white text-black hover:bg-gray-200"
-                  >
-                    <UserPlus className="h-5 w-5 mr-2" />
-                    <span className="text-black">Sign Up</span>
-                  </Button>
-                </Link>
-              </>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
