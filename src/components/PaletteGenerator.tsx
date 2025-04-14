@@ -1,12 +1,11 @@
-
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import ColorCard from './ColorCard';
 import PaletteDialog from './PaletteDialog';
 import { Wand2, Save } from 'lucide-react';
 import { THEME_COLORS, generateAIColors } from '@/lib/colors';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 
@@ -22,32 +21,9 @@ const PaletteGenerator = () => {
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
-  const [editingPaletteId, setEditingPaletteId] = useState<string | null>(null);
   const navigate = useNavigate();
-  const generateButtonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    const storedEditingPaletteId = localStorage.getItem('editingPaletteId');
-    if (storedEditingPaletteId) {
-      setEditingPaletteId(storedEditingPaletteId);
-      
-      const editingPalette = localStorage.getItem('editingPalette');
-      if (editingPalette) {
-        setCurrentPalette(JSON.parse(editingPalette));
-      }
-    }
-  }, []);
 
   const handleGenerate = async () => {
-    if (!prompt.trim()) {
-      toast({
-        title: "Empty prompt",
-        description: "Please enter a prompt to generate colors",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     setLoading(true);
     try {
       const colors = await generateAIColors(prompt);
@@ -66,7 +42,6 @@ const PaletteGenerator = () => {
 
   const handleSave = async () => {
     try {
-      setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -74,43 +49,39 @@ const PaletteGenerator = () => {
           title: "Login Required",
           description: "You need to be logged in to save palettes",
           variant: "destructive",
-          className: "w-auto h-auto p-4"
+          className: "fixed bottom-4 right-4"
         });
         return;
       }
 
-      if (editingPaletteId) {
-        console.log("Updating palette with ID:", editingPaletteId);
+      const editingId = localStorage.getItem('editingPaletteId');
+      
+      if (editingId) {
+        // Update existing palette
         const { error } = await supabase
           .from('palettes')
           .update({
             colors: currentPalette,
             name: prompt || 'Untitled Palette'
           })
-          .eq('id', editingPaletteId);
+          .eq('id', editingId);
 
-        if (error) {
-          console.error("Update error:", error);
-          throw error;
-        }
-
-        console.log("Palette updated successfully");
+        if (error) throw error;
 
         toast({
           title: "Success!",
           description: "Palette updated successfully",
         });
 
-        // Important: Clear localStorage after successful update
+        // Clear editing state
         localStorage.removeItem('editingPalette');
         localStorage.removeItem('editingPaletteId');
-        setEditingPaletteId(null);
         
-        // Navigate to saved page to see the updated palette
+        // Navigate back to saved palettes
         navigate('/saved');
       } else {
-        console.log("Creating new palette");
-        const { error, data } = await supabase
+        // Create new palette
+        const { error } = await supabase
           .from('palettes')
           .insert([
             {
@@ -118,23 +89,14 @@ const PaletteGenerator = () => {
               colors: currentPalette,
               name: prompt || 'Untitled Palette',
             },
-          ])
-          .select();
+          ]);
 
-        if (error) {
-          console.error("Insert error:", error);
-          throw error;
-        }
-
-        console.log("New palette saved successfully", data);
+        if (error) throw error;
 
         toast({
           title: "Success!",
           description: "Palette saved successfully",
         });
-        
-        // Navigate to saved page to see the new palette
-        navigate('/saved');
       }
     } catch (error: any) {
       console.error('Save error:', error);
@@ -142,22 +104,13 @@ const PaletteGenerator = () => {
         title: "Error",
         description: "Failed to save palette. Please try again.",
         variant: "destructive",
-        className: "w-auto h-auto p-4"
+        className: "fixed bottom-4 right-4"
       });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && generateButtonRef.current) {
-      e.preventDefault();
-      generateButtonRef.current.click();
     }
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto pt-24 space-y-12">
+    <div className="w-full max-w-4xl mx-auto space-y-12 pt-20">
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold tracking-tight text-black">
           ColorVibe
@@ -173,14 +126,12 @@ const PaletteGenerator = () => {
             placeholder="Try keywords like 'sunset' or 'ocean'..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={handleInputKeyDown}
             className="flex-1"
           />
           <Button
             onClick={handleGenerate}
-            className="bg-black text-white hover:bg-black/90 hover:text-white"
+            className="bg-black text-white hover:bg-black/90"
             disabled={loading}
-            ref={generateButtonRef}
           >
             <Wand2 className="mr-2 h-4 w-4" />
             Generate
@@ -188,8 +139,7 @@ const PaletteGenerator = () => {
           <Button
             onClick={handleSave}
             variant="outline"
-            className="border-gray-200 hover:text-white"
-            disabled={loading}
+            className="border-gray-200"
           >
             <Save className="mr-2 h-4 w-4" />
             Save

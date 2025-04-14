@@ -4,11 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
-import { useRef } from "react";
 
 const Login = () => {
   const navigate = useNavigate();
-  const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,18 +46,8 @@ const Login = () => {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && submitButtonRef.current) {
-      // Don't trigger submit if the event is from an input field
-      if (e.target instanceof HTMLInputElement) {
-        return;
-      }
-      submitButtonRef.current.click();
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4" onKeyDown={handleKeyDown}>
+    <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
@@ -81,11 +69,6 @@ const Login = () => {
                 required
                 className="mt-1"
                 placeholder="you@example.com"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && submitButtonRef.current) {
-                    // Allow the form submission to happen naturally
-                  }
-                }}
               />
             </div>
             <div>
@@ -100,20 +83,11 @@ const Login = () => {
                 required
                 className="mt-1"
                 placeholder="Enter your password"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && submitButtonRef.current) {
-                    // Allow the form submission to happen naturally
-                  }
-                }}
               />
             </div>
           </div>
 
-          <Button 
-            type="submit" 
-            className="w-full bg-black text-white hover:bg-black/90"
-            ref={submitButtonRef}
-          >
+          <Button type="submit" className="w-full bg-black text-white hover:bg-black/90">
             Sign in
           </Button>
 
