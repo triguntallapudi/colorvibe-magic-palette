@@ -1,77 +1,158 @@
+
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
-import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useToast } from "@/components/ui/use-toast";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Menu, LogIn, UserPlus, Save, LogOut, User, ChevronDown } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
 const Navigation = () => {
-  const { data: { user }, signOut } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-
-  const handleSignOut = async () => {
-    await signOut();
-    // Don't navigate to login, just stay on current page
-  };
-
-  const [mounted, setMounted] = useState(false);
-
+  
   useEffect(() => {
-    setMounted(true);
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  if (!mounted) {
-    return null;
-  }
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+  };
 
   return (
-    <div className="flex items-center justify-end p-4">
-      {user ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email || "Avatar"} />
-                <AvatarFallback>{user?.email?.[0].toUpperCase()}</AvatarFallback>
-              </Avatar>
+    <nav className="bg-black text-white fixed top-0 left-0 right-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <Link to="/" className="text-xl font-bold">
+              ColorVibe
+            </Link>
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="flex items-center sm:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="text-white hover:bg-gray-800"
+            >
+              <Menu className="h-6 w-6" />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 mr-4">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/saved">Saved Palettes</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : (
-        <>
-          {location.pathname !== '/login' && (
-            <Link to="/login">
-              <Button variant="outline" size="sm" className="mr-2">
-                Log In
+          </div>
+
+          {/* Desktop menu */}
+          <div className="hidden sm:flex sm:items-center sm:space-x-4">
+            {user && location.pathname === '/' && (
+              <Button variant="ghost" asChild className="text-white hover:bg-gray-800">
+                <Link to="/saved" className="hover:text-white">
+                  <Save className="mr-2 h-4 w-4" />
+                  Saved Palettes
+                </Link>
               </Button>
-            </Link>
-          )}
-          {location.pathname !== '/signup' && (
-            <Link to="/signup">
-              <Button size="sm">Sign Up</Button>
-            </Link>
-          )}
-        </>
-      )}
-    </div>
+            )}
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:bg-gray-800 hover:text-white focus:ring-0 focus-visible:ring-0 focus:ring-offset-0"
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-2 py-1.5 text-sm text-gray-500">
+                    {user.email}
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button variant="ghost" asChild className="text-white hover:bg-gray-800">
+                  <Link to="/login" className="hover:text-white">
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Login
+                  </Link>
+                </Button>
+                <Button variant="default" asChild className="bg-white text-black hover:bg-gray-100">
+                  <Link to="/signup" className="hover:text-black">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Sign Up
+                  </Link>
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        {isMenuOpen && (
+          <div className="sm:hidden pb-4">
+            <div className="flex flex-col space-y-2">
+              {user ? (
+                <>
+                  <Button variant="ghost" asChild className="justify-start text-white hover:bg-gray-800">
+                    <Link to="/saved">
+                      <Save className="mr-2 h-4 w-4" />
+                      Saved Palettes
+                    </Link>
+                  </Button>
+                  <div className="px-4 py-2 text-sm text-gray-400">
+                    {user.email}
+                  </div>
+                  <Button variant="ghost" onClick={handleLogout} className="justify-start text-white hover:bg-gray-800">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" asChild className="justify-start text-white hover:bg-gray-800">
+                    <Link to="/login">
+                      <LogIn className="mr-2 h-4 w-4" />
+                      Login
+                    </Link>
+                  </Button>
+                  <Button variant="default" asChild className="justify-start bg-white text-black hover:bg-gray-100">
+                    <Link to="/signup">
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Sign Up
+                    </Link>
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </nav>
   );
 };
 
