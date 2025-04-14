@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trash2, Edit2, Pencil } from 'lucide-react';
@@ -28,192 +28,337 @@ const Saved = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
+  const saveButtonRef = useRef<HTMLButtonElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
+
+  const fetchPalettes = useCallback(async () => {
+    console.log("Fetching palettes...");
+    setIsLoading(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Please log in",
+          description: "You need to be logged in to view saved palettes"
+        });
+        navigate('/login');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('palettes')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Fetch error:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load palettes"
+        });
+        return;
+      }
+
+      console.log("Fetched palettes:", data);
+      setPalettes(data || []);
+      
+      if (initialLoad && data && data.length > 0) {
+        console.log("Clearing all palettes on initial load");
+        setTimeout(() => {
+          clearAllPalettes();
+        }, 500);
+        setInitialLoad(false);
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [navigate, initialLoad]);
 
   useEffect(() => {
     fetchPalettes();
-  }, []);
+    
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log("Page became visible, fetching fresh data");
+        fetchPalettes();
+      }
+    };
+    
+    const handleFocus = () => {
+      console.log("Window focused, fetching fresh data");
+      fetchPalettes();
+    };
 
-  const fetchPalettes = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: "Please log in",
-        description: "You need to be logged in to view saved palettes",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from('palettes')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load palettes",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setPalettes(data || []);
-  };
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [fetchPalettes]);
 
   const handleDelete = async (id: number) => {
-    const { error } = await supabase
-      .from('palettes')
-      .delete()
-      .eq('id', id);
+    try {
+      setIsLoading(true);
+      console.log("Deleting palette with ID:", id);
+      
+      const { error } = await supabase
+        .from('palettes')
+        .delete()
+        .eq('id', id);
 
-    if (error) {
+      if (error) {
+        console.error("Delete error:", error);
+        throw error;
+      }
+
+      console.log("Palette deleted successfully");
+      
+      setPalettes(prevPalettes => prevPalettes.filter(palette => palette.id !== id));
+      
+      toast({
+        title: "Success",
+        description: "Palette deleted successfully"
+      });
+    } catch (error) {
+      console.error("Delete error:", error);
       toast({
         title: "Error",
-        description: "Failed to delete palette",
-        variant: "destructive",
+        description: "Failed to delete palette"
       });
-      return;
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    setPalettes(current => current.filter(p => p.id !== id));
-    fetchPalettes();
-
-    toast({
-      title: "Success",
-      description: "Palette deleted successfully",
-    });
+  const clearAllPalettes = async () => {
+    try {
+      setIsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { error } = await supabase
+        .from('palettes')
+        .delete()
+        .eq('user_id', user.id);
+        
+      if (error) {
+        console.error("Delete all error:", error);
+        throw error;
+      }
+      
+      toast({
+        title: "Success",
+        description: "All palettes deleted successfully"
+      });
+      
+      setPalettes([]);
+    } catch (error) {
+      console.error("Clear all error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete all palettes"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleRename = async () => {
-    if (!editingId) return;
+    if (!editingId || !editingName.trim()) return;
 
-    const { error } = await supabase
-      .from('palettes')
-      .update({ name: editingName })
-      .eq('id', editingId);
+    try {
+      setIsLoading(true);
+      console.log("Renaming palette with ID:", editingId, "to:", editingName);
+      
+      const { error } = await supabase
+        .from('palettes')
+        .update({ name: editingName })
+        .eq('id', editingId);
 
-    if (error) {
+      if (error) {
+        console.error("Rename error:", error);
+        throw error;
+      }
+
+      console.log("Palette renamed successfully");
+      
+      setPalettes(prevPalettes => 
+        prevPalettes.map(palette => 
+          palette.id === editingId ? { ...palette, name: editingName } : palette
+        )
+      );
+      
+      setDialogOpen(false);
+      setEditingId(null);
+      setEditingName('');
+
+      toast({
+        title: "Success",
+        description: "Palette renamed successfully"
+      });
+    } catch (error) {
+      console.error("Rename error:", error);
       toast({
         title: "Error",
-        description: "Failed to rename palette",
-        variant: "destructive",
+        description: "Failed to rename palette"
       });
-      return;
+    } finally {
+      setIsLoading(false);
     }
-
-    setPalettes(current => current.map(p => 
-      p.id === editingId ? { ...p, name: editingName } : p
-    ));
-    fetchPalettes();
-
-    setDialogOpen(false);
-    setEditingId(null);
-    setEditingName('');
-
-    toast({
-      title: "Success",
-      description: "Palette renamed successfully",
-    });
   };
 
-  const handleEdit = (colors: string[], id: number) => {
-    localStorage.setItem('editingPalette', JSON.stringify(colors));
-    localStorage.setItem('editingPaletteId', id.toString());
-    navigate('/');
+  const handleEdit = async (colors: string[], id: number) => {
+    try {
+      console.log("Setting up for editing palette with ID:", id);
+      
+      localStorage.setItem('editingPalette', JSON.stringify(colors));
+      localStorage.setItem('editingPaletteId', id.toString());
+      
+      localStorage.removeItem('savedColors');
+      localStorage.removeItem('currentKeyword');
+      
+      navigate('/');
+    } catch (error) {
+      console.error("Edit setup error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to set up palette editing"
+      });
+    }
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && saveButtonRef.current) {
+      e.preventDefault();
+      saveButtonRef.current.click();
+    }
   };
 
   return (
-    <div className="container mx-auto pt-28 pb-16 px-4">
-      <div className="flex items-center gap-6 mb-12">
-        <Button asChild variant="ghost" className="p-0 hover:bg-transparent">
-          <Link to="/" className="flex items-center">
-            <ArrowLeft className="h-12 w-12 stroke-[1.5]" />
-          </Link>
-        </Button>
+    <div className="container mx-auto pt-24 pb-16 px-4">
+      <div className="flex items-center mb-8">
+        <Link to="/" className="bg-black text-white hover:bg-[#333333] rounded-md p-2 flex items-center justify-center transition-colors mr-3 self-center">
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
         <h1 className="text-3xl font-bold">Saved Palettes</h1>
+        
+        <Button 
+          onClick={clearAllPalettes} 
+          className="ml-auto bg-black text-white hover:bg-[#333333]"
+          disabled={isLoading}
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Clear All
+        </Button>
       </div>
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {palettes.map((palette) => (
-          <div key={palette.id} className="bg-white rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl">
-            <div className="relative group">
-              <div className="flex h-48">
-                {palette.colors.map((color, index) => (
-                  <div
-                    key={index}
-                    style={{ backgroundColor: color }}
-                    className="flex-1 transition-all hover:flex-[1.5]"
-                  />
-                ))}
-              </div>
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleEdit(palette.colors, palette.id)}
-                  className="rounded-full bg-white hover:bg-white/90"
-                >
-                  <Edit2 className="h-5 w-5 text-black" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleDelete(palette.id)}
-                  className="rounded-full bg-white hover:bg-white/90"
-                >
-                  <Trash2 className="h-5 w-5 text-black" />
-                </Button>
-              </div>
-            </div>
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-medium text-gray-900">{palette.name}</h3>
-                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                  <DialogTrigger asChild>
+
+      {isLoading ? (
+        <div className="flex justify-center items-center h-40">
+          <p className="text-gray-500">Loading palettes...</p>
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {palettes.map((palette) => (
+              <div key={palette.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-300 hover:shadow-md transition-shadow hover:shadow-lg">
+                <div className="relative group">
+                  <div className="flex h-48">
+                    {palette.colors.map((color, index) => (
+                      <div
+                        key={index}
+                        style={{ backgroundColor: color }}
+                        className="flex-1 transition-all hover:flex-[1.5]"
+                      />
+                    ))}
+                  </div>
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100">
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="icon"
-                      onClick={() => {
-                        setEditingName(palette.name);
-                        setEditingId(palette.id);
-                      }}
-                      className="hover:bg-transparent"
+                      onClick={() => handleEdit(palette.colors, palette.id)}
+                      className="rounded-full bg-white hover:bg-white/90"
                     >
-                      <Pencil className="h-4 w-4 text-gray-500" />
+                      <Edit2 className="h-5 w-5 text-black" />
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent className="bg-white">
-                    <DialogHeader>
-                      <DialogTitle>Rename Palette</DialogTitle>
-                      <DialogDescription>
-                        Enter a new name for your palette
-                      </DialogDescription>
-                    </DialogHeader>
-                    <Input
-                      value={editingName}
-                      onChange={(e) => setEditingName(e.target.value)}
-                      placeholder="Enter palette name"
-                    />
-                    <DialogFooter>
-                      <Button onClick={handleRename}>Save</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleDelete(palette.id)}
+                      className="rounded-full bg-white hover:bg-white/90"
+                    >
+                      <Trash2 className="h-5 w-5 text-black" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="p-4 border-t border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-medium text-gray-900">{palette.name}</h3>
+                    <Dialog open={dialogOpen && editingId === palette.id} onOpenChange={(open) => {
+                      setDialogOpen(open);
+                      if (!open) {
+                        setEditingId(null);
+                        setEditingName('');
+                      }
+                    }}>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setEditingName(palette.name);
+                            setEditingId(palette.id);
+                          }}
+                          className="hover:bg-transparent"
+                        >
+                          <Pencil className="h-4 w-4 text-gray-500" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-white">
+                        <DialogHeader>
+                          <DialogTitle>Rename Palette</DialogTitle>
+                          <DialogDescription>
+                            Enter a new name for your palette
+                          </DialogDescription>
+                        </DialogHeader>
+                        <Input
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          onKeyDown={handleInputKeyDown}
+                          placeholder="Enter palette name"
+                          autoFocus
+                        />
+                        <DialogFooter>
+                          <Button onClick={handleRename} ref={saveButtonRef} className="bg-black text-white font-medium hover:bg-[#333333]">Save</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                  <div className="grid grid-cols-5 gap-4 mt-4">
+                    {palette.colors.map((color, index) => (
+                      <span key={index} className="text-xs font-mono text-gray-500 text-center">
+                        {color}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="grid grid-cols-5 gap-4">
-                {palette.colors.map((color, index) => (
-                  <span key={index} className="text-xs font-mono text-gray-500 text-center">
-                    {color}
-                  </span>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
-      {palettes.length === 0 && (
-        <p className="text-center text-gray-500 mt-8">No saved palettes yet</p>
+          {palettes.length === 0 && (
+            <p className="text-center text-gray-500 mt-8">No saved palettes yet</p>
+          )}
+        </>
       )}
     </div>
   );
