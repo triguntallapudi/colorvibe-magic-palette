@@ -130,13 +130,11 @@ const PaletteDialog = ({
   onPaletteChange,
 }: PaletteDialogProps) => {
   const [editablePalette, setEditablePalette] = useState(palette);
-  const [currentColorIndex, setCurrentColorIndex] = useState(selectedColorIndex);
   const [rgb, setRgb] = useState(hexToRgb(palette[selectedColorIndex]));
   const [hsb, setHsb] = useState(rgbToHsb(rgb.r, rgb.g, rgb.b));
 
   useEffect(() => {
     setEditablePalette(palette);
-    setCurrentColorIndex(selectedColorIndex);
     setRgb(hexToRgb(palette[selectedColorIndex]));
     setHsb(rgbToHsb(rgb.r, rgb.g, rgb.b));
   }, [palette, selectedColorIndex]);
@@ -144,7 +142,7 @@ const PaletteDialog = ({
   const handleColorChange = (rgb: { r: number, g: number, b: number }) => {
     const newColor = rgbToHex(rgb.r, rgb.g, rgb.b);
     const newPalette = [...editablePalette];
-    newPalette[currentColorIndex] = newColor;
+    newPalette[selectedColorIndex] = newColor;
     setEditablePalette(newPalette);
     setRgb(rgb);
     setHsb(rgbToHsb(rgb.r, rgb.g, rgb.b));
@@ -153,7 +151,7 @@ const PaletteDialog = ({
   const handleRgbChange = (newRgb: { r: number; g: number; b: number }) => {
     const newColor = rgbToHex(newRgb.r, newRgb.g, newRgb.b);
     const newPalette = [...editablePalette];
-    newPalette[currentColorIndex] = newColor;
+    newPalette[selectedColorIndex] = newColor;
     setEditablePalette(newPalette);
     setRgb(newRgb);
     setHsb(rgbToHsb(newRgb.r, newRgb.g, newRgb.b));
@@ -163,7 +161,7 @@ const PaletteDialog = ({
     const newRgb = hsbToRgb(newHsb.h, newHsb.s, newHsb.b);
     const newColor = rgbToHex(newRgb.r, newRgb.g, newRgb.b);
     const newPalette = [...editablePalette];
-    newPalette[currentColorIndex] = newColor;
+    newPalette[selectedColorIndex] = newColor;
     setEditablePalette(newPalette);
     setRgb(newRgb);
     setHsb(newHsb);
@@ -187,20 +185,19 @@ const PaletteDialog = ({
               <button
                 key={index}
                 className={`h-12 rounded-lg transition-all ${
-                  currentColorIndex === index ? 'ring-2 ring-black ring-offset-2' : ''
+                  selectedColorIndex === index ? 'ring-2 ring-black ring-offset-2' : ''
                 }`}
                 style={{ backgroundColor: color }}
                 onClick={() => {
-                  setCurrentColorIndex(index);
+                  setSelectedColorIndex(index);
                   setRgb(hexToRgb(color));
-                  setHsb(rgbToHsb(hexToRgb(color).r, hexToRgb(color).g, hexToRgb(color).b));
                 }}
               />
             ))}
           </div>
 
           <div className="p-4 rounded-lg bg-gray-50 border border-gray-100">
-            <div className="h-24 mb-4 rounded-lg shadow-sm" style={{ backgroundColor: editablePalette[currentColorIndex] }} />
+            <div className="h-24 mb-4 rounded-lg shadow-sm" style={{ backgroundColor: editablePalette[selectedColorIndex] }} />
             
             <Tabs defaultValue="rgb" className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-4">
@@ -306,10 +303,10 @@ const PaletteDialog = ({
               <TabsContent value="hex">
                 <Input
                   type="text"
-                  value={editablePalette[currentColorIndex]}
+                  value={editablePalette[selectedColorIndex]}
                   onChange={(e) => {
                     const newPalette = [...editablePalette];
-                    newPalette[currentColorIndex] = e.target.value;
+                    newPalette[selectedColorIndex] = e.target.value;
                     setEditablePalette(newPalette);
                     const newRgb = hexToRgb(e.target.value);
                     setRgb(newRgb);
