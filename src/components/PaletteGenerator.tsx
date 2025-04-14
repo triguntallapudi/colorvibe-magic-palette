@@ -4,8 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import ColorCard from './ColorCard';
 import PaletteDialog from './PaletteDialog';
-import { Wand2, Save, Shuffle } from 'lucide-react';
-import { THEME_COLORS, generateAIColors, getRandomPalette } from '@/lib/colors';
+import { Wand2, Save } from 'lucide-react';
+import { THEME_COLORS, generateAIColors } from '@/lib/colors';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
@@ -64,31 +64,6 @@ const PaletteGenerator = () => {
     setLoading(false);
   };
 
-  const handleRandomGenerate = () => {
-    setLoading(true);
-    try {
-      const randomColors = getRandomPalette();
-      console.log("Generated random palette:", randomColors);
-      setCurrentPalette(randomColors);
-      
-      // Set prompt to match the theme if possible
-      const matchingTheme = Object.entries(THEME_COLORS).find(
-        ([_, colors]) => colors.toString() === randomColors.toString()
-      );
-      if (matchingTheme) {
-        setPrompt(matchingTheme[0]);
-      }
-    } catch (error) {
-      console.error("Random generation error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to generate random colors",
-        variant: "destructive",
-      });
-    }
-    setLoading(false);
-  };
-
   const handleSave = async () => {
     try {
       setLoading(true);
@@ -99,6 +74,7 @@ const PaletteGenerator = () => {
           title: "Login Required",
           description: "You need to be logged in to save palettes",
           variant: "destructive",
+          className: "w-auto h-auto p-4"
         });
         return;
       }
@@ -125,7 +101,7 @@ const PaletteGenerator = () => {
           description: "Palette updated successfully",
         });
 
-        // Clear localStorage after successful update
+        // Important: Clear localStorage after successful update
         localStorage.removeItem('editingPalette');
         localStorage.removeItem('editingPaletteId');
         setEditingPaletteId(null);
@@ -134,7 +110,7 @@ const PaletteGenerator = () => {
         navigate('/saved');
       } else {
         console.log("Creating new palette");
-        const { error } = await supabase
+        const { error, data } = await supabase
           .from('palettes')
           .insert([
             {
@@ -142,14 +118,15 @@ const PaletteGenerator = () => {
               colors: currentPalette,
               name: prompt || 'Untitled Palette',
             },
-          ]);
+          ])
+          .select();
 
         if (error) {
           console.error("Insert error:", error);
           throw error;
         }
 
-        console.log("New palette saved successfully");
+        console.log("New palette saved successfully", data);
 
         toast({
           title: "Success!",
@@ -165,6 +142,7 @@ const PaletteGenerator = () => {
         title: "Error",
         description: "Failed to save palette. Please try again.",
         variant: "destructive",
+        className: "w-auto h-auto p-4"
       });
     } finally {
       setLoading(false);
@@ -200,7 +178,7 @@ const PaletteGenerator = () => {
           />
           <Button
             onClick={handleGenerate}
-            className="bg-black text-white hover:bg-[#333333] hover:text-white"
+            className="bg-black text-white hover:bg-black/90 hover:text-white"
             disabled={loading}
             ref={generateButtonRef}
           >
@@ -208,17 +186,9 @@ const PaletteGenerator = () => {
             Generate
           </Button>
           <Button
-            onClick={handleRandomGenerate}
-            className="bg-black text-white hover:bg-[#333333] hover:text-white"
-            disabled={loading}
-            title="Generate Random Palette"
-          >
-            <Shuffle className="h-4 w-4" />
-          </Button>
-          <Button
             onClick={handleSave}
             variant="outline"
-            className="border-gray-200 text-black hover:text-black"
+            className="border-gray-200 hover:text-white"
             disabled={loading}
           >
             <Save className="mr-2 h-4 w-4" />
@@ -257,9 +227,8 @@ const PaletteGenerator = () => {
             <ul className="space-y-3 text-gray-600">
               <li>1. Enter a descriptive word or phrase (e.g., "sunset", "ocean")</li>
               <li>2. Click Generate to create a unique color palette</li>
-              <li>3. Click Random to get a surprise palette</li>
-              <li>4. Click on any color to edit it manually</li>
-              <li>5. Save your favorite palettes for future reference</li>
+              <li>3. Click on any color to edit it manually</li>
+              <li>4. Save your favorite palettes for future reference</li>
             </ul>
           </div>
         </div>

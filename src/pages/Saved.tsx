@@ -31,6 +31,8 @@ const Saved = () => {
   const navigate = useNavigate();
   const saveButtonRef = useRef<HTMLButtonElement>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastOperation, setLastOperation] = useState<{type: string, id?: number, timestamp: number} | null>(null);
+  const isInitialMount = useRef(true);
 
   // Enhanced fetchPalettes function that uses supabase directly each time
   const fetchPalettes = useCallback(async () => {
@@ -42,7 +44,8 @@ const Saved = () => {
       if (!user) {
         toast({
           title: "Please log in",
-          description: "You need to be logged in to view saved palettes"
+          description: "You need to be logged in to view saved palettes",
+          variant: "destructive",
         });
         navigate('/login');
         return;
@@ -59,7 +62,8 @@ const Saved = () => {
         console.error("Fetch error:", error);
         toast({
           title: "Error",
-          description: "Failed to load palettes"
+          description: "Failed to load palettes",
+          variant: "destructive",
         });
         return;
       }
@@ -70,7 +74,8 @@ const Saved = () => {
       console.error("Fetch error:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred"
+        description: "An unexpected error occurred",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -84,13 +89,11 @@ const Saved = () => {
     // Set up listeners for page visibility and focus
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        console.log("Page became visible, fetching fresh data");
         fetchPalettes();
       }
     };
     
     const handleFocus = () => {
-      console.log("Window focused, fetching fresh data");
       fetchPalettes();
     };
 
@@ -103,6 +106,14 @@ const Saved = () => {
       window.removeEventListener('focus', handleFocus);
     };
   }, [fetchPalettes]);
+
+  // This ensures palettes are refetched after operations
+  useEffect(() => {
+    if (lastOperation && !isInitialMount.current) {
+      fetchPalettes();
+    }
+    isInitialMount.current = false;
+  }, [lastOperation, fetchPalettes]);
 
   const handleDelete = async (id: number) => {
     try {
@@ -124,48 +135,26 @@ const Saved = () => {
       // Update the local state to reflect the deletion immediately
       setPalettes(prevPalettes => prevPalettes.filter(palette => palette.id !== id));
       
+      // Record the operation for forcing refetch
+      setLastOperation({
+        type: 'delete',
+        id: id,
+        timestamp: Date.now()
+      });
+
       toast({
         title: "Success",
-        description: "Palette deleted successfully"
+        description: "Palette deleted successfully",
       });
+      
+      // Force a refetch to ensure data consistency
+      await fetchPalettes();
     } catch (error) {
       console.error("Delete error:", error);
       toast({
         title: "Error",
-        description: "Failed to delete palette"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const clearAllPalettes = async () => {
-    try {
-      setIsLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      
-      const { error } = await supabase
-        .from('palettes')
-        .delete()
-        .eq('user_id', user.id);
-        
-      if (error) {
-        console.error("Delete all error:", error);
-        throw error;
-      }
-      
-      toast({
-        title: "Success",
-        description: "All palettes deleted successfully"
-      });
-      
-      setPalettes([]);
-    } catch (error) {
-      console.error("Clear all error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete all palettes"
+        description: "Failed to delete palette",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -198,19 +187,30 @@ const Saved = () => {
         )
       );
       
+      // Record the operation for forcing refetch
+      setLastOperation({
+        type: 'rename',
+        id: editingId,
+        timestamp: Date.now()
+      });
+
       setDialogOpen(false);
       setEditingId(null);
       setEditingName('');
 
       toast({
         title: "Success",
-        description: "Palette renamed successfully"
+        description: "Palette renamed successfully",
       });
+      
+      // Force a refetch to ensure data consistency
+      await fetchPalettes();
     } catch (error) {
       console.error("Rename error:", error);
       toast({
         title: "Error",
-        description: "Failed to rename palette"
+        description: "Failed to rename palette",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -225,16 +225,20 @@ const Saved = () => {
       localStorage.setItem('editingPalette', JSON.stringify(colors));
       localStorage.setItem('editingPaletteId', id.toString());
       
-      // Clear any previous editing state to ensure we're starting fresh
-      localStorage.removeItem('savedColors');
-      localStorage.removeItem('currentKeyword');
+      // Record the operation for forcing refetch when returning
+      setLastOperation({
+        type: 'edit',
+        id: id,
+        timestamp: Date.now()
+      });
       
       navigate('/');
     } catch (error) {
       console.error("Edit setup error:", error);
       toast({
         title: "Error",
-        description: "Failed to set up palette editing"
+        description: "Failed to set up palette editing",
+        variant: "destructive",
       });
     }
   };
@@ -248,31 +252,22 @@ const Saved = () => {
 
   return (
     <div className="container mx-auto pt-24 pb-16 px-4">
-      <div className="flex items-center gap-4 mb-8">
-        <Link to="/" className="bg-black text-white hover:bg-[#333333] rounded-md p-2 flex items-center justify-center transition-colors">
-          <ArrowLeft className="h-5 w-5" />
+      <div className="flex items-center gap-4 mb-12">
+        <Link to="/" className="text-gray-600 hover:text-gray-900">
+          <ArrowLeft className="h-6 w-6" />
         </Link>
-        <h1 className="text-3xl font-bold dark:text-white">Saved Palettes</h1>
-        
-        <Button 
-          onClick={clearAllPalettes} 
-          className="ml-auto bg-black text-white hover:bg-[#333333]"
-          disabled={isLoading}
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Clear All
-        </Button>
+        <h1 className="text-3xl font-bold">Saved Palettes</h1>
       </div>
 
       {isLoading ? (
         <div className="flex justify-center items-center h-40">
-          <p className="text-gray-500 dark:text-gray-400">Loading palettes...</p>
+          <p className="text-gray-500">Loading palettes...</p>
         </div>
       ) : (
         <>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {palettes.map((palette) => (
-              <div key={palette.id} className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-300 dark:border-gray-700 hover:shadow-md transition-shadow hover:shadow-lg">
+              <div key={palette.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-300 hover:shadow-md transition-shadow hover:shadow-lg">
                 <div className="relative group">
                   <div className="flex h-48">
                     {palette.colors.map((color, index) => (
@@ -302,9 +297,9 @@ const Saved = () => {
                     </Button>
                   </div>
                 </div>
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="p-4 border-t border-gray-200">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-medium text-gray-900 dark:text-white">{palette.name}</h3>
+                    <h3 className="font-medium text-gray-900">{palette.name}</h3>
                     <Dialog open={dialogOpen && editingId === palette.id} onOpenChange={(open) => {
                       setDialogOpen(open);
                       if (!open) {
@@ -322,13 +317,13 @@ const Saved = () => {
                           }}
                           className="hover:bg-transparent"
                         >
-                          <Pencil className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                          <Pencil className="h-4 w-4 text-gray-500" />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="bg-white dark:bg-gray-800">
+                      <DialogContent className="bg-white">
                         <DialogHeader>
-                          <DialogTitle className="dark:text-white">Rename Palette</DialogTitle>
-                          <DialogDescription className="dark:text-gray-400">
+                          <DialogTitle>Rename Palette</DialogTitle>
+                          <DialogDescription>
                             Enter a new name for your palette
                           </DialogDescription>
                         </DialogHeader>
@@ -338,17 +333,16 @@ const Saved = () => {
                           onKeyDown={handleInputKeyDown}
                           placeholder="Enter palette name"
                           autoFocus
-                          className="dark:bg-gray-700 dark:text-white"
                         />
                         <DialogFooter>
-                          <Button onClick={handleRename} ref={saveButtonRef} className="bg-black text-white font-medium hover:bg-[#333333]">Save</Button>
+                          <Button onClick={handleRename} ref={saveButtonRef}>Save</Button>
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
                   </div>
                   <div className="grid grid-cols-5 gap-4 mt-4">
                     {palette.colors.map((color, index) => (
-                      <span key={index} className="text-xs font-mono text-gray-500 dark:text-gray-400 text-center">
+                      <span key={index} className="text-xs font-mono text-gray-500 text-center">
                         {color}
                       </span>
                     ))}
@@ -358,7 +352,7 @@ const Saved = () => {
             ))}
           </div>
           {palettes.length === 0 && (
-            <p className="text-center text-gray-500 dark:text-gray-400 mt-8">No saved palettes yet</p>
+            <p className="text-center text-gray-500 mt-8">No saved palettes yet</p>
           )}
         </>
       )}

@@ -8,8 +8,8 @@ type ToasterToast = ToastProps & {
   action?: React.ReactNode
 }
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 3000
+const TOAST_LIMIT = 5
+const TOAST_REMOVE_DELAY = 1000000
 
 type ToasterToastState = {
   toasts: ToasterToast[]
@@ -66,8 +66,8 @@ const reducer = (state: State, action: Action): State => {
           {
             ...(action.toast as ToasterToast),
             id: genId(),
-            open: true,
           },
+          ...state.toasts,
         ].slice(0, TOAST_LIMIT),
       }
 
@@ -82,30 +82,11 @@ const reducer = (state: State, action: Action): State => {
     case actionTypes.DISMISS_TOAST: {
       const { toastId } = action
 
-      // Create a dismiss timeout
-      if (toastId) {
-        if (toastTimeouts.has(toastId)) {
-          clearTimeout(toastTimeouts.get(toastId))
-        }
-
-        toastTimeouts.set(
-          toastId,
-          setTimeout(() => {
-            dispatch({
-              type: actionTypes.REMOVE_TOAST,
-              toastId,
-            })
-            toastTimeouts.delete(toastId)
-          }, TOAST_REMOVE_DELAY)
-        )
-      }
-
       if (toastId === undefined) {
         return {
           ...state,
           toasts: state.toasts.map((t) => ({
             ...t,
-            open: false,
           })),
         }
       }
@@ -116,7 +97,6 @@ const reducer = (state: State, action: Action): State => {
           t.id === toastId
             ? {
                 ...t,
-                open: false,
               }
             : t
         ),
@@ -173,11 +153,6 @@ function toast({ ...props }: Toast) {
       },
     },
   })
-
-  // Auto-dismiss after a delay
-  setTimeout(() => {
-    dismiss()
-  }, 3000)
 
   return {
     id,
