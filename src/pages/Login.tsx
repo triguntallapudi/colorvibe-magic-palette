@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import { toast } from "@/components/ui/use-toast";
 import { useRef } from "react";
 
 const Login = () => {
@@ -15,6 +16,15 @@ const Login = () => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -22,14 +32,25 @@ const Login = () => {
       });
 
       if (error) throw error;
+
+      toast({
+        title: "Welcome back!",
+        description: "Successfully logged in",
+      });
+      
       navigate('/');
     } catch (error: any) {
-      console.error(error.message);
+      toast({
+        title: "Error",
+        description: error.message || "Invalid email or password",
+        variant: "destructive",
+      });
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && submitButtonRef.current) {
+      // Don't trigger submit if the event is from an input field
       if (e.target instanceof HTMLInputElement) {
         return;
       }
@@ -60,6 +81,11 @@ const Login = () => {
                 required
                 className="mt-1"
                 placeholder="you@example.com"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && submitButtonRef.current) {
+                    // Allow the form submission to happen naturally
+                  }
+                }}
               />
             </div>
             <div>
@@ -74,16 +100,21 @@ const Login = () => {
                 required
                 className="mt-1"
                 placeholder="Enter your password"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && submitButtonRef.current) {
+                    // Allow the form submission to happen naturally
+                  }
+                }}
               />
             </div>
           </div>
 
           <Button 
             type="submit" 
-            className="w-full bg-black text-white hover:bg-gray-800 transition-colors"
+            className="w-full bg-black text-white hover:bg-[#333333]"
             ref={submitButtonRef}
           >
-            Log in
+            Sign in
           </Button>
 
           <p className="text-center text-sm text-gray-600">
