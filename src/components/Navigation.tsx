@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, LogIn, UserPlus, Save, LogOut, User, ChevronDown } from 'lucide-react';
+import { Menu, LogIn, UserPlus, Save, LogOut, User, ChevronDown, Palette } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -87,6 +87,11 @@ const Navigation = () => {
                     {user.email}
                   </div>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/browse')} className="cursor-pointer">
+                    <Palette className="mr-2 h-4 w-4" />
+                    Browse Palettes
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
@@ -95,14 +100,14 @@ const Navigation = () => {
               </DropdownMenu>
             ) : (
               <>
-                <Button variant="ghost" asChild className="text-white hover:bg-gray-800">
-                  <Link to="/login" className="hover:text-white">
+                <Button variant="ghost" asChild className="text-white hover:bg-gray-800 hover:text-white">
+                  <Link to="/login" className="text-white hover:text-white">
                     <LogIn className="mr-2 h-4 w-4" />
                     Login
                   </Link>
                 </Button>
                 <Button variant="default" asChild className="bg-white text-black hover:bg-gray-100">
-                  <Link to="/signup" className="hover:text-black">
+                  <Link to="/signup" className="text-white hover:text-white">
                     <UserPlus className="mr-2 h-4 w-4" />
                     Sign Up
                   </Link>
@@ -124,6 +129,12 @@ const Navigation = () => {
                       Saved Palettes
                     </Link>
                   </Button>
+                  <Button variant="ghost" asChild className="justify-start text-white hover:bg-gray-800">
+                    <Link to="/browse">
+                      <Palette className="mr-2 h-4 w-4" />
+                      Browse Palettes
+                    </Link>
+                  </Button>
                   <div className="px-4 py-2 text-sm text-gray-400">
                     {user.email}
                   </div>
@@ -135,13 +146,13 @@ const Navigation = () => {
               ) : (
                 <>
                   <Button variant="ghost" asChild className="justify-start text-white hover:bg-gray-800">
-                    <Link to="/login">
+                    <Link to="/login" className="text-white hover:text-white">
                       <LogIn className="mr-2 h-4 w-4" />
                       Login
                     </Link>
                   </Button>
                   <Button variant="default" asChild className="justify-start bg-white text-black hover:bg-gray-100">
-                    <Link to="/signup">
+                    <Link to="/signup" className="text-white hover:text-white">
                       <UserPlus className="mr-2 h-4 w-4" />
                       Sign Up
                     </Link>
