@@ -48,18 +48,6 @@ const Saved = () => {
         return;
       }
 
-      // Clear all palettes from the database when the component first loads
-      const { error: clearError } = await supabase
-        .from('palettes')
-        .delete()
-        .eq('user_id', user.id);
-        
-      if (clearError) {
-        console.error("Clear error:", clearError);
-      } else {
-        console.log("All palettes have been cleared");
-      }
-      
       // Get fresh data directly from Supabase
       const { data, error } = await supabase
         .from('palettes')
@@ -89,9 +77,31 @@ const Saved = () => {
     }
   }, [navigate]);
 
-  // Force a refetch on initial mount only
+  // Force a refetch on initial mount and whenever the component gains focus or visibility
   useEffect(() => {
     fetchPalettes();
+    
+    // Set up listeners for page visibility and focus
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log("Page became visible, fetching fresh data");
+        fetchPalettes();
+      }
+    };
+    
+    const handleFocus = () => {
+      console.log("Window focused, fetching fresh data");
+      fetchPalettes();
+    };
+
+    // These event listeners ensure data is refreshed when returning to the page
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [fetchPalettes]);
 
   const handleDelete = async (id: number) => {
@@ -239,10 +249,10 @@ const Saved = () => {
   return (
     <div className="container mx-auto pt-24 pb-16 px-4">
       <div className="flex items-center mb-8">
-        <Link to="/" className="bg-black text-white hover:bg-[#333333] rounded-md p-2 flex items-center justify-center transition-colors mr-3 self-start">
+        <Link to="/" className="bg-black text-white hover:bg-[#333333] rounded-md p-2 flex items-center justify-center transition-colors mr-3">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="text-3xl font-bold">Saved Palettes</h1>
+        <h1 className="text-3xl font-bold dark:text-white">Saved Palettes</h1>
         
         <Button 
           onClick={clearAllPalettes} 
@@ -256,13 +266,13 @@ const Saved = () => {
 
       {isLoading ? (
         <div className="flex justify-center items-center h-40">
-          <p className="text-gray-500">Loading palettes...</p>
+          <p className="text-gray-500 dark:text-gray-400">Loading palettes...</p>
         </div>
       ) : (
         <>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {palettes.map((palette) => (
-              <div key={palette.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-300 hover:shadow-md transition-shadow hover:shadow-lg">
+              <div key={palette.id} className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-300 dark:border-gray-700 hover:shadow-md transition-shadow hover:shadow-lg">
                 <div className="relative group">
                   <div className="flex h-48">
                     {palette.colors.map((color, index) => (
@@ -292,9 +302,9 @@ const Saved = () => {
                     </Button>
                   </div>
                 </div>
-                <div className="p-4 border-t border-gray-200">
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-medium text-gray-900">{palette.name}</h3>
+                    <h3 className="font-medium text-gray-900 dark:text-white">{palette.name}</h3>
                     <Dialog open={dialogOpen && editingId === palette.id} onOpenChange={(open) => {
                       setDialogOpen(open);
                       if (!open) {
@@ -312,13 +322,13 @@ const Saved = () => {
                           }}
                           className="hover:bg-transparent"
                         >
-                          <Pencil className="h-4 w-4 text-gray-500" />
+                          <Pencil className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="bg-white">
+                      <DialogContent className="bg-white dark:bg-gray-800">
                         <DialogHeader>
-                          <DialogTitle>Rename Palette</DialogTitle>
-                          <DialogDescription>
+                          <DialogTitle className="dark:text-white">Rename Palette</DialogTitle>
+                          <DialogDescription className="dark:text-gray-400">
                             Enter a new name for your palette
                           </DialogDescription>
                         </DialogHeader>
@@ -328,6 +338,7 @@ const Saved = () => {
                           onKeyDown={handleInputKeyDown}
                           placeholder="Enter palette name"
                           autoFocus
+                          className="dark:bg-gray-700 dark:text-white"
                         />
                         <DialogFooter>
                           <Button onClick={handleRename} ref={saveButtonRef} className="bg-black text-white font-medium hover:bg-[#333333]">Save</Button>
@@ -337,7 +348,7 @@ const Saved = () => {
                   </div>
                   <div className="grid grid-cols-5 gap-4 mt-4">
                     {palette.colors.map((color, index) => (
-                      <span key={index} className="text-xs font-mono text-gray-500 text-center">
+                      <span key={index} className="text-xs font-mono text-gray-500 dark:text-gray-400 text-center">
                         {color}
                       </span>
                     ))}
@@ -347,7 +358,7 @@ const Saved = () => {
             ))}
           </div>
           {palettes.length === 0 && (
-            <p className="text-center text-gray-500 mt-8">No saved palettes yet</p>
+            <p className="text-center text-gray-500 dark:text-gray-400 mt-8">No saved palettes yet</p>
           )}
         </>
       )}

@@ -71,9 +71,13 @@ const PaletteGenerator = () => {
       console.log("Generated random palette:", randomColors);
       setCurrentPalette(randomColors);
       
-      // Set a default prompt for randomly generated palettes
-      setPrompt("Random Palette");
-      
+      // Set prompt to match the theme if possible
+      const matchingTheme = Object.entries(THEME_COLORS).find(
+        ([_, colors]) => colors.toString() === randomColors.toString()
+      );
+      if (matchingTheme) {
+        setPrompt(matchingTheme[0]);
+      }
     } catch (error) {
       console.error("Random generation error:", error);
       toast({
