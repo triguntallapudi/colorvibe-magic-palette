@@ -114,85 +114,11 @@ export const colorKeywords = {
   "olive": ["#827717", "#9E9D24", "#AFB42B", "#C0CA33", "#CDDC39"],
   "berry": ["#880E4F", "#AD1457", "#C2185B", "#D81B60", "#E91E63"],
   "ivory": ["#FFFDE7", "#FFF9C4", "#FFF59D", "#FFF176", "#FFEE58"],
-  "teal": ["#00BCD4", "#00ACC1", "#0097A7", "#00838F", "#006064"],
-  "aqua": ["#00FFFF", "#7FFFD4", "#40E0D0", "#48D1CC", "#00CED1"],
-  "magenta": ["#FF00FF", "#FF66FF", "#FF33FF", "#CC00CC", "#990099"],
-  "scarlet": ["#FF2400", "#F21C0C", "#DC143C", "#ED2939", "#FD0E35"],
-  "lilac": ["#C8A2C8", "#D8BFD8", "#E6E6FA", "#CCCCFF", "#DCD0FF"],
-  "mustard": ["#FFDB58", "#FFD700", "#F1C40F", "#FFC300", "#FFBF00"],
-  "mauve": ["#E0B0FF", "#D8BFD8", "#C9A0DC", "#BA83CC", "#AA77BD"],
-  "cerulean": ["#007BA7", "#0093AF", "#0892D0", "#00A1D6", "#4CC9F0"],
-  "burgundy": ["#800020", "#900020", "#A52A2A", "#9B2226", "#8C0303"],
-  "navy": ["#000080", "#00008B", "#0000CD", "#0000FF", "#1E3A8A"],
-  "charcoal": ["#36454F", "#2F4F4F", "#2D383A", "#444444", "#343434"],
-  "azure": ["#007FFF", "#0080FF", "#0087FF", "#0892D0", "#00A1D6"],
-  "chocolate": ["#7B3F00", "#4A2511", "#5C4033", "#6B4226", "#3C280D"],
-  "cream": ["#FFFDD0", "#FFFFF0", "#FEFFEF", "#FFFCE8", "#FFFACD"],
-  "maroon": ["#800000", "#7F0000", "#690000", "#5E0000", "#520000"],
-  "periwinkle": ["#CCCCFF", "#B5B7FF", "#ABBBFF", "#8F99FB", "#7B83EB"],
-  "chartreuse": ["#7FFF00", "#8FFF00", "#9FFF00", "#AFFF00", "#BFFF00"],
-  "crimson": ["#DC143C", "#D90429", "#C71F37", "#B21E35", "#A11D33"],
-  "hunter": ["#355E3B", "#234F1E", "#2E5A20", "#395D33", "#3B5E2B"],
-  "dusty-rose": ["#DCAE96", "#D8B9A0", "#C49A84", "#E8B298", "#FBBF93"],
-  "caramel": ["#CC7722", "#C78022", "#B87233", "#BE6E46", "#D9A566"],
-  "peach": ["#FFE5B4", "#FFCC99", "#FFDAB9", "#FFDAC1", "#FFDFD3"],
-  "olive-green": ["#556B2F", "#545911", "#5A6400", "#5A6521", "#64732F"],
-  "salmon": ["#FA8072", "#FF8C69", "#FF9999", "#FF91A4", "#FFA07A"],
-  "pewter": ["#8E9191", "#899499", "#708090", "#7F8084", "#94979A"],
-  "pumpkin": ["#FF7518", "#FF7417", "#FF7518", "#FF7F00", "#FF8000"],
-  "jade": ["#00A86B", "#00A86B", "#29AB87", "#4CBB17", "#50C878"],
-  "cornflower": ["#6495ED", "#6F9EEB", "#779ECB", "#6CA6CD", "#5A9BD8"],
-  "terracotta": ["#E2725B", "#D37A5A", "#C35A48", "#B25446", "#A24936"],
-  "peacock": ["#005F87", "#006D7A", "#00798C", "#00858F", "#009B96"],
-  "mahogany": ["#512626", "#4A2511", "#481D17", "#3D1817", "#3B2025"],
-  "aubergine": ["#3D0C02", "#3A0523", "#3B002A", "#450136", "#4A0146"],
-  "electric-blue": ["#7DF9FF", "#6FF7FF", "#5CB8E4", "#0892D0", "#0087FF"],
-  "fern": ["#71BC78", "#5FA778", "#4D8B60", "#507D5D", "#4B6F5A"],
-  "slate-blue": ["#6A5ACD", "#7B68EE", "#836FFF", "#9370DB", "#A388EE"],
-  "bubblegum": ["#FFC1CC", "#FFDFEF", "#FFC0CB", "#FFDFF4", "#FBCCE7"],
-  "graphite": ["#3F3F3F", "#383838", "#2F3333", "#232B2B", "#0A0A0A"]
+  "teal": ["#00BCD4", "#00ACC1", "#0097A7", "#00838F", "#006064"]
 };
 
 export const getRandomKeyword = (): string => {
   const keywords = Object.keys(colorKeywords);
   const randomIndex = Math.floor(Math.random() * keywords.length);
   return keywords[randomIndex];
-};
-
-export const THEME_COLORS = {
-  default: ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEEAD"],
-  dark: ["#212121", "#424242", "#616161", "#757575", "#9E9E9E"],
-  light: ["#F5F5F5", "#EEEEEE", "#E0E0E0", "#BDBDBD", "#9E9E9E"],
-  ocean: ["#006994", "#0099CC", "#00B7EB", "#59C1BD", "#006D77"],
-  forest: ["#1B4D3E", "#226F54", "#3F7F5F", "#7FB685", "#A5C9AC"],
-  sunset: ["#FF9E80", "#FF6E40", "#FF3D00", "#DD2C00", "#BF360C"],
-  vintage: ["#A1887F", "#8D6E63", "#795548", "#6D4C41", "#5D4037"],
-  spring: ["#8BC34A", "#CDDC39", "#FFEB3B", "#FFC107", "#FF9800"],
-  winter: ["#B3E5FC", "#81D4FA", "#4FC3F7", "#29B6F6", "#03A9F4"],
-  pastel: ["#FFD3E0", "#D3F8FF", "#FFF3CD", "#DCEDC8", "#F8BBD0"],
-  vibrant: ["#FF5252", "#FF4081", "#E040FB", "#7C4DFF", "#536DFE"],
-  minimal: ["#F5F5F5", "#EEEEEE", "#E0E0E0", "#BDBDBD", "#9E9E9E"],
-};
-
-export const generateAIColors = async (prompt: string): Promise<string[]> => {
-  const lowercasePrompt = prompt.toLowerCase();
-  
-  for (const [keyword, colors] of Object.entries(colorKeywords)) {
-    if (lowercasePrompt.includes(keyword.toLowerCase())) {
-      return colors;
-    }
-  }
-  
-  for (const [theme, colors] of Object.entries(THEME_COLORS)) {
-    if (lowercasePrompt.includes(theme.toLowerCase())) {
-      return colors;
-    }
-  }
-  
-  return getRandomPalette();
-};
-
-export const getRandomPalette = (): string[] => {
-  const randomKeyword = getRandomKeyword();
-  return colorKeywords[randomKeyword];
 };

@@ -1,8 +1,9 @@
 
 import { Toaster } from "@/components/ui/toaster";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navigation from "./components/Navigation";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -12,20 +13,12 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-function TooltipWrapper({ children }: { children: React.ReactNode }) {
-  return (
-    <TooltipProvider>
-      {children}
-    </TooltipProvider>
-  );
-}
-
 const App = () => {
   console.log("Rendering App component"); // Debug log
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <TooltipWrapper>
+      <TooltipProvider>
+        <BrowserRouter>
           <Navigation />
           <main>
             <Routes>
@@ -37,8 +30,9 @@ const App = () => {
             </Routes>
           </main>
           <Toaster />
-        </TooltipWrapper>
-      </BrowserRouter>
+          <Sonner />
+        </BrowserRouter>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 };
