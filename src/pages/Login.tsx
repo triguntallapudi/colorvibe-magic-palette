@@ -1,3 +1,4 @@
+
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
@@ -5,7 +6,7 @@ import { useRef } from "react";
 
 const Login = () => {
   const navigate = useNavigate();
-  const submitButtonRef = useRef<HTMLButtonElement>(null);
+  const submitButtonRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
