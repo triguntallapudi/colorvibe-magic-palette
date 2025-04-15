@@ -9,12 +9,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 const Navigation = () => {
   const { data: { user }, signOut } = useAuth();
   const location = useLocation();
+  const [mounted, setMounted] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
   };
-
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -50,14 +49,14 @@ const Navigation = () => {
             {user ? (
               <>
                 <Link to="/saved">
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-900 hover:text-white">
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700 hover:text-white">
                     <BookmarkIcon className="h-5 w-5 mr-2" />
                     Saved Palettes
                   </Button>
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="text-white hover:bg-gray-900 hover:text-white">
+                    <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700 hover:text-white">
                       <UserRound className="h-5 w-5 mr-2" />
                       Profile
                       <ChevronDown className="h-4 w-4 ml-1" />
@@ -68,7 +67,7 @@ const Navigation = () => {
                       <div className="text-sm font-normal text-gray-400">{user.email}</div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-gray-700" />
-                    <DropdownMenuItem onClick={handleSignOut} className="hover:bg-gray-800 text-white">
+                    <DropdownMenuItem onClick={handleSignOut} className="hover:bg-gray-700 text-white cursor-pointer">
                       Sign out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -79,18 +78,18 @@ const Navigation = () => {
                 <Link to="/login">
                   <Button 
                     variant="ghost" 
-                    size="sm" 
-                    className="text-white hover:bg-gray-900 hover:text-white transition-colors"
+                    size="sm"
+                    className="text-white h-9 px-4 hover:bg-gray-700 hover:text-white"
                   >
-                    Log In
+                    <span className="flex items-center justify-center text-white">Log In</span>
                   </Button>
                 </Link>
                 <Link to="/signup">
                   <Button 
-                    size="sm" 
-                    className="bg-white text-black hover:bg-gray-200 hover:text-black transition-colors"
+                    size="sm"
+                    className="bg-white text-black h-9 px-4 hover:bg-gray-200 hover:text-black"
                   >
-                    Sign Up
+                    <span className="flex items-center justify-center">Sign Up</span>
                   </Button>
                 </Link>
               </>

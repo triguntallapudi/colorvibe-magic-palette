@@ -111,7 +111,7 @@ const Login = () => {
 
           <Button 
             type="submit" 
-            className="w-full bg-black text-white hover:bg-black/90"
+            className="w-full bg-black text-white hover:bg-[#333333]"
             ref={submitButtonRef}
           >
             Sign in

@@ -31,7 +31,6 @@ const Saved = () => {
   const navigate = useNavigate();
   const saveButtonRef = useRef<HTMLButtonElement>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const isInitialMount = useRef(true);
 
   // Enhanced fetchPalettes function that uses supabase directly each time
   const fetchPalettes = useCallback(async () => {
@@ -43,13 +42,24 @@ const Saved = () => {
       if (!user) {
         toast({
           title: "Please log in",
-          description: "You need to be logged in to view saved palettes",
-          variant: "destructive",
+          description: "You need to be logged in to view saved palettes"
         });
         navigate('/login');
         return;
       }
 
+      // Clear all palettes from the database when the component first loads
+      const { error: clearError } = await supabase
+        .from('palettes')
+        .delete()
+        .eq('user_id', user.id);
+        
+      if (clearError) {
+        console.error("Clear error:", clearError);
+      } else {
+        console.log("All palettes have been cleared");
+      }
+      
       // Get fresh data directly from Supabase
       const { data, error } = await supabase
         .from('palettes')
@@ -61,8 +71,7 @@ const Saved = () => {
         console.error("Fetch error:", error);
         toast({
           title: "Error",
-          description: "Failed to load palettes",
-          variant: "destructive",
+          description: "Failed to load palettes"
         });
         return;
       }
@@ -73,74 +82,16 @@ const Saved = () => {
       console.error("Fetch error:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
+        description: "An unexpected error occurred"
       });
     } finally {
       setIsLoading(false);
     }
   }, [navigate]);
 
-  // Clear all palettes (only for development)
-  const clearAllPalettes = async () => {
-    try {
-      setIsLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      
-      const { error } = await supabase
-        .from('palettes')
-        .delete()
-        .eq('user_id', user.id);
-        
-      if (error) {
-        console.error("Delete all error:", error);
-        throw error;
-      }
-      
-      toast({
-        title: "Success",
-        description: "All palettes deleted successfully",
-      });
-      
-      setPalettes([]);
-    } catch (error) {
-      console.error("Clear all error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete all palettes",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Force a refetch on initial mount and whenever the component gains focus or visibility
+  // Force a refetch on initial mount only
   useEffect(() => {
     fetchPalettes();
-    
-    // Set up listeners for page visibility and focus
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        console.log("Page became visible, fetching fresh data");
-        fetchPalettes();
-      }
-    };
-    
-    const handleFocus = () => {
-      console.log("Window focused, fetching fresh data");
-      fetchPalettes();
-    };
-
-    // These event listeners ensure data is refreshed when returning to the page
-    window.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-    
-    return () => {
-      window.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
-    };
   }, [fetchPalettes]);
 
   const handleDelete = async (id: number) => {
@@ -165,14 +116,46 @@ const Saved = () => {
       
       toast({
         title: "Success",
-        description: "Palette deleted successfully",
+        description: "Palette deleted successfully"
       });
     } catch (error) {
       console.error("Delete error:", error);
       toast({
         title: "Error",
-        description: "Failed to delete palette",
-        variant: "destructive",
+        description: "Failed to delete palette"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const clearAllPalettes = async () => {
+    try {
+      setIsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { error } = await supabase
+        .from('palettes')
+        .delete()
+        .eq('user_id', user.id);
+        
+      if (error) {
+        console.error("Delete all error:", error);
+        throw error;
+      }
+      
+      toast({
+        title: "Success",
+        description: "All palettes deleted successfully"
+      });
+      
+      setPalettes([]);
+    } catch (error) {
+      console.error("Clear all error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete all palettes"
       });
     } finally {
       setIsLoading(false);
@@ -211,17 +194,13 @@ const Saved = () => {
 
       toast({
         title: "Success",
-        description: "Palette renamed successfully",
+        description: "Palette renamed successfully"
       });
-      
-      // Re-fetch to ensure data consistency
-      await fetchPalettes();
     } catch (error) {
       console.error("Rename error:", error);
       toast({
         title: "Error",
-        description: "Failed to rename palette",
-        variant: "destructive",
+        description: "Failed to rename palette"
       });
     } finally {
       setIsLoading(false);
@@ -236,13 +215,16 @@ const Saved = () => {
       localStorage.setItem('editingPalette', JSON.stringify(colors));
       localStorage.setItem('editingPaletteId', id.toString());
       
+      // Clear any previous editing state to ensure we're starting fresh
+      localStorage.removeItem('savedColors');
+      localStorage.removeItem('currentKeyword');
+      
       navigate('/');
     } catch (error) {
       console.error("Edit setup error:", error);
       toast({
         title: "Error",
-        description: "Failed to set up palette editing",
-        variant: "destructive",
+        description: "Failed to set up palette editing"
       });
     }
   };
@@ -256,23 +238,18 @@ const Saved = () => {
 
   return (
     <div className="container mx-auto pt-24 pb-16 px-4">
-      <div className="flex items-center justify-between gap-4 mb-12">
-        <div className="flex items-center gap-4">
-          <Link to="/" className="text-gray-600 hover:text-gray-900">
-            <ArrowLeft className="h-6 w-6" />
-          </Link>
-          <h1 className="text-3xl font-bold">Saved Palettes</h1>
-        </div>
+      <div className="flex items-center mb-8">
+        <Link to="/" className="bg-black text-white hover:bg-[#333333] rounded-md p-2 flex items-center justify-center transition-colors mr-3 self-start">
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        <h1 className="text-3xl font-bold">Saved Palettes</h1>
         
-        {/* Clear all palettes button (development only) */}
         <Button 
-          variant="outline" 
-          size="sm" 
           onClick={clearAllPalettes} 
-          className="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-red-200"
+          className="ml-auto bg-black text-white hover:bg-[#333333]"
           disabled={isLoading}
         >
-          <Trash2 className="h-4 w-4 mr-2" />
+          <Trash2 className="mr-2 h-4 w-4" />
           Clear All
         </Button>
       </div>
@@ -353,7 +330,7 @@ const Saved = () => {
                           autoFocus
                         />
                         <DialogFooter>
-                          <Button onClick={handleRename} ref={saveButtonRef}>Save</Button>
+                          <Button onClick={handleRename} ref={saveButtonRef} className="bg-black text-white font-medium hover:bg-[#333333]">Save</Button>
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
