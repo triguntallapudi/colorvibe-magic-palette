@@ -249,7 +249,7 @@ const Saved = () => {
   return (
     <div className="container mx-auto pt-24 pb-16 px-4">
       <div className="flex items-center mb-8">
-        <Link to="/" className="bg-black text-white hover:bg-[#333333] rounded-md p-2 flex items-center justify-center transition-colors mr-3 self-center">
+        <Link to="/" className="bg-black text-white hover:bg-[#333333] rounded-md p-2 flex items-center justify-center transition-colors mr-3">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h1 className="text-3xl font-bold dark:text-white">Saved Palettes</h1>
