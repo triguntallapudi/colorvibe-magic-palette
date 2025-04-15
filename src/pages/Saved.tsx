@@ -31,6 +31,7 @@ const Saved = () => {
   const navigate = useNavigate();
   const saveButtonRef = useRef<HTMLButtonElement>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const isInitialMount = useRef(true);
 
   // Enhanced fetchPalettes function that uses supabase directly each time
   const fetchPalettes = useCallback(async () => {
@@ -212,6 +213,9 @@ const Saved = () => {
         title: "Success",
         description: "Palette renamed successfully",
       });
+      
+      // Re-fetch to ensure data consistency
+      await fetchPalettes();
     } catch (error) {
       console.error("Rename error:", error);
       toast({
@@ -262,11 +266,13 @@ const Saved = () => {
         
         {/* Clear all palettes button (development only) */}
         <Button 
+          variant="outline" 
+          size="sm" 
           onClick={clearAllPalettes} 
-          className="bg-black text-white hover:bg-black/90 hover:text-white"
+          className="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-red-200"
           disabled={isLoading}
         >
-          <Trash2 className="mr-2 h-4 w-4" />
+          <Trash2 className="h-4 w-4 mr-2" />
           Clear All
         </Button>
       </div>
