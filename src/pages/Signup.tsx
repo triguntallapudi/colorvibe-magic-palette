@@ -4,17 +4,19 @@ import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 const Signup = () => {
   const navigate = useNavigate();
   const submitButtonRef = useRef<HTMLButtonElement>(null);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordMatch, setPasswordMatch] = useState(true);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
 
     if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       toast({
@@ -29,6 +31,16 @@ const Signup = () => {
       toast({
         title: "Invalid password",
         description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setPasswordMatch(false);
+      toast({
+        title: "Passwords don't match",
+        description: "Please make sure your passwords match",
         variant: "destructive",
       });
       return;
@@ -67,6 +79,18 @@ const Signup = () => {
     }
   };
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (confirmPassword) {
+      setPasswordMatch(e.target.value === confirmPassword);
+    }
+  };
+
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setConfirmPassword(e.target.value);
+    setPasswordMatch(password === e.target.value);
+  };
+
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4" onKeyDown={handleKeyDown}>
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
@@ -90,11 +114,6 @@ const Signup = () => {
                 required
                 className="mt-1"
                 placeholder="you@example.com"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && submitButtonRef.current) {
-                    // Allow the form submission to happen naturally
-                  }
-                }}
               />
             </div>
             <div>
@@ -109,19 +128,36 @@ const Signup = () => {
                 required
                 className="mt-1"
                 placeholder="At least 6 characters"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && submitButtonRef.current) {
-                    // Allow the form submission to happen naturally
-                  }
-                }}
+                value={password}
+                onChange={handlePasswordChange}
               />
+            </div>
+            <div>
+              <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
+                Confirm Password
+              </label>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                className={`mt-1 ${!passwordMatch && confirmPassword ? 'border-red-500' : ''}`}
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={handleConfirmPasswordChange}
+              />
+              {!passwordMatch && confirmPassword && (
+                <p className="text-red-500 text-xs mt-1">Passwords don't match</p>
+              )}
             </div>
           </div>
 
           <Button 
             type="submit" 
-            className="w-full bg-black text-white hover:bg-black/90"
+            className="w-full bg-black text-white hover:bg-[#333333]"
             ref={submitButtonRef}
+            disabled={password && confirmPassword ? !passwordMatch : false}
           >
             Create account
           </Button>

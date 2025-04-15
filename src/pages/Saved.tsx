@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash2, Edit2, Pencil, Wand2 } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit2, Pencil } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -42,8 +42,7 @@ const Saved = () => {
       if (!user) {
         toast({
           title: "Please log in",
-          description: "You need to be logged in to view saved palettes",
-          variant: "destructive",
+          description: "You need to be logged in to view saved palettes"
         });
         navigate('/login');
         return;
@@ -60,8 +59,7 @@ const Saved = () => {
         console.error("Fetch error:", error);
         toast({
           title: "Error",
-          description: "Failed to load palettes",
-          variant: "destructive",
+          description: "Failed to load palettes"
         });
         return;
       }
@@ -72,48 +70,12 @@ const Saved = () => {
       console.error("Fetch error:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
+        description: "An unexpected error occurred"
       });
     } finally {
       setIsLoading(false);
     }
   }, [navigate]);
-
-  // Clear all palettes (only for development)
-  const clearAllPalettes = async () => {
-    try {
-      setIsLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      
-      const { error } = await supabase
-        .from('palettes')
-        .delete()
-        .eq('user_id', user.id);
-        
-      if (error) {
-        console.error("Delete all error:", error);
-        throw error;
-      }
-      
-      toast({
-        title: "Success",
-        description: "All palettes deleted successfully",
-      });
-      
-      setPalettes([]);
-    } catch (error) {
-      console.error("Clear all error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete all palettes",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // Force a refetch on initial mount and whenever the component gains focus or visibility
   useEffect(() => {
@@ -164,14 +126,46 @@ const Saved = () => {
       
       toast({
         title: "Success",
-        description: "Palette deleted successfully",
+        description: "Palette deleted successfully"
       });
     } catch (error) {
       console.error("Delete error:", error);
       toast({
         title: "Error",
-        description: "Failed to delete palette",
-        variant: "destructive",
+        description: "Failed to delete palette"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const clearAllPalettes = async () => {
+    try {
+      setIsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { error } = await supabase
+        .from('palettes')
+        .delete()
+        .eq('user_id', user.id);
+        
+      if (error) {
+        console.error("Delete all error:", error);
+        throw error;
+      }
+      
+      toast({
+        title: "Success",
+        description: "All palettes deleted successfully"
+      });
+      
+      setPalettes([]);
+    } catch (error) {
+      console.error("Clear all error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete all palettes"
       });
     } finally {
       setIsLoading(false);
@@ -210,14 +204,13 @@ const Saved = () => {
 
       toast({
         title: "Success",
-        description: "Palette renamed successfully",
+        description: "Palette renamed successfully"
       });
     } catch (error) {
       console.error("Rename error:", error);
       toast({
         title: "Error",
-        description: "Failed to rename palette",
-        variant: "destructive",
+        description: "Failed to rename palette"
       });
     } finally {
       setIsLoading(false);
@@ -232,13 +225,16 @@ const Saved = () => {
       localStorage.setItem('editingPalette', JSON.stringify(colors));
       localStorage.setItem('editingPaletteId', id.toString());
       
+      // Clear any previous editing state to ensure we're starting fresh
+      localStorage.removeItem('savedColors');
+      localStorage.removeItem('currentKeyword');
+      
       navigate('/');
     } catch (error) {
       console.error("Edit setup error:", error);
       toast({
         title: "Error",
-        description: "Failed to set up palette editing",
-        variant: "destructive",
+        description: "Failed to set up palette editing"
       });
     }
   };
@@ -252,21 +248,18 @@ const Saved = () => {
 
   return (
     <div className="container mx-auto pt-24 pb-16 px-4">
-      <div className="flex items-center justify-between gap-4 mb-12">
-        <div className="flex items-center gap-4">
-          <Link to="/" className="text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300">
-            <ArrowLeft className="h-6 w-6" />
-          </Link>
-          <h1 className="text-3xl font-bold dark:text-white">Saved Palettes</h1>
-        </div>
+      <div className="flex items-center mb-8">
+        <Link to="/" className="bg-black text-white hover:bg-[#333333] rounded-md p-2 flex items-center justify-center transition-colors mr-3">
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        <h1 className="text-3xl font-bold dark:text-white">Saved Palettes</h1>
         
-        {/* Clear all palettes button (development only) */}
         <Button 
           onClick={clearAllPalettes} 
-          className="bg-black text-white hover:bg-[#333333] hover:text-white"
+          className="ml-auto bg-black text-white hover:bg-[#333333]"
           disabled={isLoading}
         >
-          <Wand2 className="mr-2 h-4 w-4" />
+          <Trash2 className="mr-2 h-4 w-4" />
           Clear All
         </Button>
       </div>
@@ -348,7 +341,7 @@ const Saved = () => {
                           className="dark:bg-gray-700 dark:text-white"
                         />
                         <DialogFooter>
-                          <Button onClick={handleRename} ref={saveButtonRef} className="bg-black text-white hover:bg-[#333333]">Save</Button>
+                          <Button onClick={handleRename} ref={saveButtonRef} className="bg-black text-white font-medium hover:bg-[#333333]">Save</Button>
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>

@@ -8,7 +8,7 @@ type ToasterToast = ToastProps & {
   action?: React.ReactNode
 }
 
-const TOAST_LIMIT = 3
+const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 3000
 
 type ToasterToastState = {
@@ -60,6 +60,7 @@ const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case actionTypes.ADD_TOAST:
+      // Only allow one toast at a time
       return {
         ...state,
         toasts: [
@@ -68,8 +69,7 @@ const reducer = (state: State, action: Action): State => {
             id: genId(),
             open: true,
           },
-          ...state.toasts,
-        ].slice(0, TOAST_LIMIT),
+        ],
       }
 
     case actionTypes.UPDATE_TOAST:
@@ -175,7 +175,7 @@ function toast({ ...props }: Toast) {
     },
   })
 
-  // Auto-dismiss after a delay
+  // Auto-dismiss after 3 seconds
   setTimeout(() => {
     dismiss()
   }, 3000)
