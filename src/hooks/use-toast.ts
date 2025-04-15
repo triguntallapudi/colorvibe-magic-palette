@@ -8,7 +8,7 @@ type ToasterToast = ToastProps & {
   action?: React.ReactNode
 }
 
-const TOAST_LIMIT = 1
+const TOAST_LIMIT = 3
 const TOAST_REMOVE_DELAY = 3000
 
 type ToasterToastState = {
@@ -68,6 +68,7 @@ const reducer = (state: State, action: Action): State => {
             id: genId(),
             open: true,
           },
+          ...state.toasts,
         ].slice(0, TOAST_LIMIT),
       }
 
