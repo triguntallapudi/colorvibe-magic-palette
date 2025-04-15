@@ -2,42 +2,22 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "react-router-dom";
-import { UserRound, BookmarkIcon, ChevronDown, Sun, Moon } from "lucide-react";
+import { UserRound, BookmarkIcon, ChevronDown, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const Navigation = () => {
   const { data: { user }, signOut } = useAuth();
   const location = useLocation();
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   const handleSignOut = async () => {
     await signOut();
-  };
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', newTheme);
   };
 
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    
-    // Check for saved theme preference
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-      }
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
-      document.documentElement.classList.add('dark');
-    }
   }, []);
 
   if (!mounted) {
@@ -67,26 +47,17 @@ const Navigation = () => {
             ColorVibe
           </Link>
           <div className="flex items-center gap-4 mr-8">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={toggleTheme}
-              className="text-white hover:bg-gray-900 hover:text-white rounded-md"
-            >
-              {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-            </Button>
-            
             {user ? (
               <>
                 <Link to="/saved">
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-900 hover:text-white rounded-md">
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-900 hover:text-white">
                     <BookmarkIcon className="h-5 w-5 mr-2" />
                     Saved Palettes
                   </Button>
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="text-white hover:bg-gray-900 hover:text-white rounded-md">
+                    <Button variant="ghost" size="sm" className="text-white hover:bg-gray-900 hover:text-white">
                       <UserRound className="h-5 w-5 mr-2" />
                       Profile
                       <ChevronDown className="h-4 w-4 ml-1" />
@@ -109,7 +80,7 @@ const Navigation = () => {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-white hover:bg-gray-900 hover:text-white transition-colors rounded-md"
+                    className="text-white hover:bg-gray-900 hover:text-white transition-colors"
                   >
                     Log In
                   </Button>
@@ -117,7 +88,7 @@ const Navigation = () => {
                 <Link to="/signup">
                   <Button 
                     size="sm" 
-                    className="bg-white text-black hover:bg-gray-200 hover:text-black transition-colors rounded-md"
+                    className="bg-white text-black hover:bg-gray-200 hover:text-black transition-colors"
                   >
                     Sign Up
                   </Button>

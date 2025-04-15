@@ -125,7 +125,7 @@ const PaletteGenerator = () => {
           description: "Palette updated successfully",
         });
 
-        // Clear localStorage after successful update
+        // Important: Clear localStorage after successful update
         localStorage.removeItem('editingPalette');
         localStorage.removeItem('editingPaletteId');
         setEditingPaletteId(null);
@@ -200,7 +200,7 @@ const PaletteGenerator = () => {
           />
           <Button
             onClick={handleGenerate}
-            className="bg-black text-white hover:bg-[#333333] hover:text-white"
+            className="bg-black text-white hover:bg-black/90 hover:text-white"
             disabled={loading}
             ref={generateButtonRef}
           >
@@ -209,7 +209,7 @@ const PaletteGenerator = () => {
           </Button>
           <Button
             onClick={handleRandomGenerate}
-            className="bg-black text-white hover:bg-[#333333] hover:text-white"
+            className="bg-black text-white hover:bg-black/90 hover:text-white"
             disabled={loading}
             title="Generate Random Palette"
           >
@@ -218,7 +218,7 @@ const PaletteGenerator = () => {
           <Button
             onClick={handleSave}
             variant="outline"
-            className="border-gray-200 text-black hover:text-black"
+            className="border-gray-200 hover:text-white"
             disabled={loading}
           >
             <Save className="mr-2 h-4 w-4" />

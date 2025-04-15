@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash2, Edit2, Pencil, Wand2 } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit2, Pencil } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -254,32 +254,32 @@ const Saved = () => {
     <div className="container mx-auto pt-24 pb-16 px-4">
       <div className="flex items-center justify-between gap-4 mb-12">
         <div className="flex items-center gap-4">
-          <Link to="/" className="text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300">
+          <Link to="/" className="text-gray-600 hover:text-gray-900">
             <ArrowLeft className="h-6 w-6" />
           </Link>
-          <h1 className="text-3xl font-bold dark:text-white">Saved Palettes</h1>
+          <h1 className="text-3xl font-bold">Saved Palettes</h1>
         </div>
         
         {/* Clear all palettes button (development only) */}
         <Button 
           onClick={clearAllPalettes} 
-          className="bg-black text-white hover:bg-[#333333] hover:text-white"
+          className="bg-black text-white hover:bg-black/90 hover:text-white"
           disabled={isLoading}
         >
-          <Wand2 className="mr-2 h-4 w-4" />
+          <Trash2 className="mr-2 h-4 w-4" />
           Clear All
         </Button>
       </div>
 
       {isLoading ? (
         <div className="flex justify-center items-center h-40">
-          <p className="text-gray-500 dark:text-gray-400">Loading palettes...</p>
+          <p className="text-gray-500">Loading palettes...</p>
         </div>
       ) : (
         <>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {palettes.map((palette) => (
-              <div key={palette.id} className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-300 dark:border-gray-700 hover:shadow-md transition-shadow hover:shadow-lg">
+              <div key={palette.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-300 hover:shadow-md transition-shadow hover:shadow-lg">
                 <div className="relative group">
                   <div className="flex h-48">
                     {palette.colors.map((color, index) => (
@@ -309,9 +309,9 @@ const Saved = () => {
                     </Button>
                   </div>
                 </div>
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="p-4 border-t border-gray-200">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-medium text-gray-900 dark:text-white">{palette.name}</h3>
+                    <h3 className="font-medium text-gray-900">{palette.name}</h3>
                     <Dialog open={dialogOpen && editingId === palette.id} onOpenChange={(open) => {
                       setDialogOpen(open);
                       if (!open) {
@@ -329,13 +329,13 @@ const Saved = () => {
                           }}
                           className="hover:bg-transparent"
                         >
-                          <Pencil className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                          <Pencil className="h-4 w-4 text-gray-500" />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="bg-white dark:bg-gray-800">
+                      <DialogContent className="bg-white">
                         <DialogHeader>
-                          <DialogTitle className="dark:text-white">Rename Palette</DialogTitle>
-                          <DialogDescription className="dark:text-gray-400">
+                          <DialogTitle>Rename Palette</DialogTitle>
+                          <DialogDescription>
                             Enter a new name for your palette
                           </DialogDescription>
                         </DialogHeader>
@@ -345,17 +345,16 @@ const Saved = () => {
                           onKeyDown={handleInputKeyDown}
                           placeholder="Enter palette name"
                           autoFocus
-                          className="dark:bg-gray-700 dark:text-white"
                         />
                         <DialogFooter>
-                          <Button onClick={handleRename} ref={saveButtonRef} className="bg-black text-white hover:bg-[#333333]">Save</Button>
+                          <Button onClick={handleRename} ref={saveButtonRef}>Save</Button>
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
                   </div>
                   <div className="grid grid-cols-5 gap-4 mt-4">
                     {palette.colors.map((color, index) => (
-                      <span key={index} className="text-xs font-mono text-gray-500 dark:text-gray-400 text-center">
+                      <span key={index} className="text-xs font-mono text-gray-500 text-center">
                         {color}
                       </span>
                     ))}
@@ -365,7 +364,7 @@ const Saved = () => {
             ))}
           </div>
           {palettes.length === 0 && (
-            <p className="text-center text-gray-500 dark:text-gray-400 mt-8">No saved palettes yet</p>
+            <p className="text-center text-gray-500 mt-8">No saved palettes yet</p>
           )}
         </>
       )}
