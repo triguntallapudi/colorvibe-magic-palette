@@ -73,10 +73,14 @@ const PaletteGenerator = () => {
       
       // Set prompt to match the theme if possible
       const matchingTheme = Object.entries(THEME_COLORS).find(
-        ([_, colors]) => colors.toString() === randomColors.toString()
+        ([_, colors]) => JSON.stringify(colors) === JSON.stringify(randomColors)
       );
+      
       if (matchingTheme) {
+        console.log("Found matching theme:", matchingTheme[0]);
         setPrompt(matchingTheme[0]);
+      } else {
+        console.log("No matching theme found");
       }
     } catch (error) {
       console.error("Random generation error:", error);
