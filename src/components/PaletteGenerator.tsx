@@ -1,10 +1,11 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import ColorCard from './ColorCard';
 import PaletteDialog from './PaletteDialog';
 import { Wand2, Save, Shuffle } from 'lucide-react';
-import { THEME_COLORS, generateAIColors, getRandomPalette } from '@/lib/colors';
+import { THEME_COLORS, generateAIColors, getRandomPalette, colorKeywords } from '@/lib/colors';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
@@ -37,6 +38,30 @@ const PaletteGenerator = () => {
     }
   }, []);
 
+  // Find palette name by matching colors
+  const findPaletteName = (colors: string[]): string => {
+    // Find exact palette match in theme colors
+    for (const [theme, themeColors] of Object.entries(THEME_COLORS)) {
+      if (JSON.stringify(themeColors) === JSON.stringify(colors)) {
+        return theme.charAt(0).toUpperCase() + theme.slice(1);
+      }
+    }
+    
+    // Find exact palette match in keyword colors
+    for (const [keyword, keywordColors] of Object.entries(colorKeywords)) {
+      if (JSON.stringify(keywordColors) === JSON.stringify(colors)) {
+        // Format the keyword for display (capitalize, replace hyphens with spaces)
+        return keyword
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      }
+    }
+    
+    // If no exact match found, return a default
+    return 'Custom Palette';
+  };
+
   const handleRandomGenerate = () => {
     setLoading(true);
     try {
@@ -44,14 +69,9 @@ const PaletteGenerator = () => {
       console.log("Generated random palette:", randomColors);
       setCurrentPalette(randomColors);
       
-      const randomNames = [
-        "Sunset Vibes", "Ocean Breeze", "Forest Dreams", 
-        "Desert Dawn", "Mountain Mist", "Urban Nights",
-        "Spring Garden", "Autumn Leaves", "Winter Frost",
-        "Summer Heat"
-      ];
-      const randomName = randomNames[Math.floor(Math.random() * randomNames.length)];
-      setPrompt(randomName);
+      // Find and set the matching palette name
+      const paletteName = findPaletteName(randomColors);
+      setPrompt(paletteName);
       
       toast({
         title: "Success",
