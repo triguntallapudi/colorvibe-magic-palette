@@ -1,3 +1,6 @@
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
@@ -70,13 +73,13 @@ const Login = () => {
               <label htmlFor="email" className="text-sm font-medium text-gray-700">
                 Email address
               </label>
-              <input
+              <Input
                 id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                className="mt-1"
                 placeholder="you@example.com"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && submitButtonRef.current) {
@@ -89,13 +92,13 @@ const Login = () => {
               <label htmlFor="password" className="text-sm font-medium text-gray-700">
                 Password
               </label>
-              <input
+              <Input
                 id="password"
                 name="password"
                 type="password"
                 autoComplete="current-password"
                 required
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                className="mt-1"
                 placeholder="Enter your password"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && submitButtonRef.current) {
@@ -106,12 +109,13 @@ const Login = () => {
             </div>
           </div>
 
-          <input 
+          <Button 
             type="submit" 
-            value="Log in"
-            className="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition-colors cursor-pointer"
+            className="w-full bg-black text-white hover:bg-[#333333]"
             ref={submitButtonRef}
-          />
+          >
+            Sign in
+          </Button>
 
           <p className="text-center text-sm text-gray-600">
             Don't have an account?{" "}

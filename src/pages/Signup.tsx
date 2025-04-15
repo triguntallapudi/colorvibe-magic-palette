@@ -2,7 +2,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -61,8 +64,8 @@ const Signup = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSignup}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
-              <label htmlFor="email-address" className="sr-only">Email address</label>
-              <input
+              <Label htmlFor="email-address">Email address</Label>
+              <Input
                 id="email-address"
                 name="email"
                 type="email"
@@ -75,8 +78,8 @@ const Signup = () => {
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">Password</label>
-              <input
+              <Label htmlFor="password">Password</Label>
+              <Input
                 id="password"
                 name="password"
                 type="password"
@@ -91,12 +94,13 @@ const Signup = () => {
           </div>
 
           <div>
-            <input
+            <Button
               type="submit"
-              value="Sign up"
               disabled={loading}
               className="group relative flex w-full justify-center rounded-md border border-transparent bg-black py-2 px-4 text-sm font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
-            />
+            >
+              {loading ? "Creating account..." : "Sign up"}
+            </Button>
           </div>
         </form>
       </div>
