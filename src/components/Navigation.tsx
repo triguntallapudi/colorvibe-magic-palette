@@ -70,15 +70,24 @@ const Navigation = () => {
     <nav className="fixed top-0 left-0 right-0 bg-black text-white z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link to="/" className="text-xl font-bold">
-            ColorVibe
-          </Link>
+          {location.pathname === '/saved' ? (
+            <div className="flex items-center">
+              <Link to="/" className="text-white mr-2">
+                <ChevronLeft className="h-6 w-6" />
+              </Link>
+              <span className="text-xl font-bold">Back to Generator</span>
+            </div>
+          ) : (
+            <Link to="/" className="text-xl font-bold">
+              ColorVibe
+            </Link>
+          )}
           <div className="flex items-center gap-4 mr-8">
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={toggleTheme}
-              className="text-white hover:bg-gray-700 hover:text-white"
+              className="text-white hover:bg-gray-800 hover:text-white rounded-md"
             >
               {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
             </Button>
@@ -86,14 +95,14 @@ const Navigation = () => {
             {user ? (
               <>
                 <Link to="/saved">
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700 hover:text-white">
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-800 hover:text-white rounded-md">
                     <BookmarkIcon className="h-5 w-5 mr-2" />
                     Saved Palettes
                   </Button>
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700 hover:text-white">
+                    <Button variant="ghost" size="sm" className="text-white hover:bg-gray-800 hover:text-white rounded-md">
                       <UserRound className="h-5 w-5 mr-2" />
                       Profile
                       <ChevronDown className="h-4 w-4 ml-1" />
@@ -104,10 +113,10 @@ const Navigation = () => {
                       <div className="text-sm font-normal text-gray-400">{user.email}</div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-gray-700" />
-                    <DropdownMenuItem onClick={toggleTheme} className="hover:bg-gray-700 text-white cursor-pointer">
+                    <DropdownMenuItem onClick={toggleTheme} className="hover:bg-gray-800 text-white cursor-pointer">
                       {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleSignOut} className="hover:bg-gray-700 text-white cursor-pointer">
+                    <DropdownMenuItem onClick={handleSignOut} className="hover:bg-gray-800 text-white cursor-pointer">
                       Sign out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -118,18 +127,18 @@ const Navigation = () => {
                 <Link to="/login">
                   <Button 
                     variant="ghost" 
-                    size="sm"
-                    className="text-white h-9 px-4 hover:bg-gray-700 hover:text-white"
+                    size="sm" 
+                    className="text-white hover:bg-gray-800 hover:text-white transition-colors rounded-md"
                   >
-                    <span className="flex items-center justify-center">Log In</span>
+                    Log In
                   </Button>
                 </Link>
                 <Link to="/signup">
                   <Button 
-                    size="sm"
-                    className="bg-white text-black h-9 px-4 hover:bg-gray-200 hover:text-black"
+                    size="sm" 
+                    className="bg-white text-black hover:bg-gray-200 hover:text-black transition-colors rounded-md"
                   >
-                    <span className="flex items-center justify-center">Sign Up</span>
+                    Sign Up
                   </Button>
                 </Link>
               </>
