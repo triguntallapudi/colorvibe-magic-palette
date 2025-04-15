@@ -37,12 +37,46 @@ const PaletteGenerator = () => {
     }
   }, []);
 
+  const handleRandomGenerate = () => {
+    setLoading(true);
+    try {
+      const randomColors = getRandomPalette();
+      console.log("Generated random palette:", randomColors);
+      setCurrentPalette(randomColors);
+      
+      const randomNames = [
+        "Sunset Vibes", "Ocean Breeze", "Forest Dreams", 
+        "Desert Dawn", "Mountain Mist", "Urban Nights",
+        "Spring Garden", "Autumn Leaves", "Winter Frost",
+        "Summer Heat"
+      ];
+      const randomName = randomNames[Math.floor(Math.random() * randomNames.length)];
+      setPrompt(randomName);
+      
+      toast({
+        title: "Success",
+        description: "Random palette generated",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error("Random generation error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate random colors",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
+    setLoading(false);
+  };
+
   const handleGenerate = async () => {
     if (!prompt.trim()) {
       toast({
         title: "Empty prompt",
         description: "Please enter a prompt to generate colors",
         variant: "destructive",
+        duration: 3000,
       });
       return;
     }
@@ -52,32 +86,19 @@ const PaletteGenerator = () => {
       const colors = await generateAIColors(prompt);
       console.log("Generated colors:", colors);
       setCurrentPalette(colors);
+      
+      toast({
+        title: "Success",
+        description: "Colors generated successfully",
+        duration: 3000,
+      });
     } catch (error) {
       console.error("Color generation error:", error);
       toast({
         title: "Error",
         description: "Failed to generate colors",
         variant: "destructive",
-      });
-    }
-    setLoading(false);
-  };
-
-  const handleRandomGenerate = () => {
-    setLoading(true);
-    try {
-      const randomColors = getRandomPalette();
-      console.log("Generated random palette:", randomColors);
-      setCurrentPalette(randomColors);
-      
-      // Set prompt to empty to avoid confusion with randomly generated palettes
-      setPrompt('');
-    } catch (error) {
-      console.error("Random generation error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to generate random colors",
-        variant: "destructive",
+        duration: 3000,
       });
     }
     setLoading(false);
@@ -116,15 +137,13 @@ const PaletteGenerator = () => {
 
         toast({
           title: "Success!",
-          description: "Palette updated successfully",
+          description: editingPaletteId ? "Palette updated successfully" : "Palette saved successfully",
         });
 
-        // Clear localStorage after successful update
         localStorage.removeItem('editingPalette');
         localStorage.removeItem('editingPaletteId');
         setEditingPaletteId(null);
         
-        // Navigate to saved page to see the updated palette
         navigate('/saved');
       } else {
         console.log("Creating new palette");
@@ -147,10 +166,9 @@ const PaletteGenerator = () => {
 
         toast({
           title: "Success!",
-          description: "Palette saved successfully",
+          description: editingPaletteId ? "Palette updated successfully" : "Palette saved successfully",
         });
         
-        // Navigate to saved page to see the new palette
         navigate('/saved');
       }
     } catch (error: any) {
@@ -159,6 +177,7 @@ const PaletteGenerator = () => {
         title: "Error",
         description: "Failed to save palette. Please try again.",
         variant: "destructive",
+        duration: 3000,
       });
     } finally {
       setLoading(false);

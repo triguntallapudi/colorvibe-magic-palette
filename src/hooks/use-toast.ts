@@ -7,6 +7,7 @@ type Toast = {
   title?: string;
   description?: string;
   action?: React.ReactNode;
+  duration?: number;
   variant?: "default" | "destructive";
   open: boolean;
 }
@@ -15,6 +16,7 @@ type ToastActionType = (props: {
   title?: string;
   description?: string;
   action?: React.ReactNode;
+  duration?: number;
   variant?: "default" | "destructive";
 }) => { 
   id: string; 
@@ -23,7 +25,7 @@ type ToastActionType = (props: {
 };
 
 const TOAST_LIMIT = 3;
-const TOAST_REMOVE_DELAY = 1000000;
+const DEFAULT_DURATION = 5000;
 
 function generateId() {
   return Math.random().toString(36).substring(2, 9);
@@ -31,6 +33,16 @@ function generateId() {
 
 export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const dismiss = useCallback((toastId?: string) => {
+    if (toastId) {
+      setToasts((currentToasts) => 
+        currentToasts.filter(t => t.id !== toastId)
+      );
+    } else {
+      setToasts([]);
+    }
+  }, []);
 
   const toast: ToastActionType = useCallback((props) => {
     const id = generateId();
@@ -45,11 +57,12 @@ export function useToast() {
       [newToast, ...currentToasts].slice(0, TOAST_LIMIT)
     );
 
-    const dismiss = () => {
-      setToasts((currentToasts) => 
-        currentToasts.filter(t => t.id !== id)
-      );
-    };
+    // Auto dismiss after duration
+    if (props.duration || DEFAULT_DURATION) {
+      setTimeout(() => {
+        dismiss(id);
+      }, props.duration || DEFAULT_DURATION);
+    }
 
     const update = (updateProps: Partial<Toast>) => {
       setToasts((currentToasts) => 
@@ -59,18 +72,8 @@ export function useToast() {
       );
     };
 
-    return { id, dismiss, update };
-  }, []);
-
-  const dismiss = useCallback((toastId?: string) => {
-    if (toastId) {
-      setToasts((currentToasts) => 
-        currentToasts.filter(t => t.id !== toastId)
-      );
-    } else {
-      setToasts([]);
-    }
-  }, []);
+    return { id, dismiss: () => dismiss(id), update };
+  }, [dismiss]);
 
   return { toasts, toast, dismiss };
 }
@@ -84,4 +87,3 @@ export const toast: ToastActionType = (props) => {
     update: () => {} 
   };
 };
-
