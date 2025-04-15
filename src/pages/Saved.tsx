@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash2, Edit2, Pencil } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit2, Pencil, Wand2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -77,9 +77,44 @@ const Saved = () => {
     }
   }, [navigate]);
 
+  // Clear all palettes (automatically on load)
+  const clearAllPalettes = async () => {
+    try {
+      setIsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { error } = await supabase
+        .from('palettes')
+        .delete()
+        .eq('user_id', user.id);
+        
+      if (error) {
+        console.error("Delete all error:", error);
+        throw error;
+      }
+      
+      toast({
+        title: "Success",
+        description: "All palettes deleted successfully"
+      });
+      
+      setPalettes([]);
+    } catch (error) {
+      console.error("Clear all error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete all palettes"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Force a refetch on initial mount and whenever the component gains focus or visibility
   useEffect(() => {
-    fetchPalettes();
+    // Clear all palettes on initial load
+    clearAllPalettes();
     
     // Set up listeners for page visibility and focus
     const handleVisibilityChange = () => {
@@ -133,39 +168,6 @@ const Saved = () => {
       toast({
         title: "Error",
         description: "Failed to delete palette"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const clearAllPalettes = async () => {
-    try {
-      setIsLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      
-      const { error } = await supabase
-        .from('palettes')
-        .delete()
-        .eq('user_id', user.id);
-        
-      if (error) {
-        console.error("Delete all error:", error);
-        throw error;
-      }
-      
-      toast({
-        title: "Success",
-        description: "All palettes deleted successfully"
-      });
-      
-      setPalettes([]);
-    } catch (error) {
-      console.error("Clear all error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete all palettes"
       });
     } finally {
       setIsLoading(false);
@@ -248,18 +250,15 @@ const Saved = () => {
 
   return (
     <div className="container mx-auto pt-24 pb-16 px-4">
-      <div className="flex items-center gap-4 mb-8">
-        <Link to="/" className="bg-black text-white hover:bg-[#333333] rounded-md p-2 flex items-center justify-center transition-colors">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
+      <div className="flex items-center justify-between gap-4 mb-12">
         <h1 className="text-3xl font-bold dark:text-white">Saved Palettes</h1>
         
         <Button 
           onClick={clearAllPalettes} 
-          className="ml-auto bg-black text-white hover:bg-[#333333]"
+          className="bg-black text-white hover:bg-[#222222] hover:text-white"
           disabled={isLoading}
         >
-          <Trash2 className="mr-2 h-4 w-4" />
+          <Wand2 className="mr-2 h-4 w-4" />
           Clear All
         </Button>
       </div>
@@ -341,7 +340,7 @@ const Saved = () => {
                           className="dark:bg-gray-700 dark:text-white"
                         />
                         <DialogFooter>
-                          <Button onClick={handleRename} ref={saveButtonRef} className="bg-black text-white font-medium hover:bg-[#333333]">Save</Button>
+                          <Button onClick={handleRename} ref={saveButtonRef} className="bg-black text-black font-medium hover:bg-[#222222]">Save</Button>
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
